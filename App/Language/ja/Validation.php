@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * Japanese validation messages for the website (FrontController sets the locale to "ja").
+ * {field} = the field label, {param} = the rule parameter, {value} = the submitted value.
+ * Rules not listed here fall back to English.
+ */
+return [
+    'required'           => '{field}を入力してください。',
+    'required_with'      => '{field}を入力してください。',
+    'required_without'   => '{field}を入力してください。',
+    'valid_email'        => '{field}を正しい形式で入力してください。',
+    'valid_emails'       => '{field}を正しい形式で入力してください。',
+    'valid_url'          => '{field}を正しいURLで入力してください。',
+    'valid_url_strict'   => '{field}を正しいURLで入力してください。',
+    'valid_date'         => '{field}を正しい日付で入力してください。',
+    'matches'            => '{field}が{param}と一致しません。',
+    'differs'            => '{field}は{param}と異なる値を入力してください。',
+    'min_length'         => '{field}は{param}文字以上で入力してください。',
+    'max_length'         => '{field}は{param}文字以内で入力してください。',
+    'exact_length'       => '{field}は{param}文字で入力してください。',
+    'in_list'            => '{field}を選択してください。',
+    'not_in_list'        => '{field}の値が正しくありません。',
+    'regex_match'        => '{field}の形式が正しくありません。',
+    'numeric'            => '{field}は数字で入力してください。',
+    'integer'            => '{field}は整数で入力してください。',
+    'decimal'            => '{field}は数値で入力してください。',
+    'is_natural'         => '{field}は0以上の整数で入力してください。',
+    'is_natural_no_zero' => '{field}は1以上の整数で入力してください。',
+    'greater_than'       => '{field}は{param}より大きい値を入力してください。',
+    'greater_than_equal_to' => '{field}は{param}以上の値を入力してください。',
+    'less_than'          => '{field}は{param}より小さい値を入力してください。',
+    'less_than_equal_to' => '{field}は{param}以下の値を入力してください。',
+    'alpha'              => '{field}は半角英字で入力してください。',
+    'alpha_numeric'      => '{field}は半角英数字で入力してください。',
+    'alpha_dash'         => '{field}は半角英数字・ハイフン・アンダースコアで入力してください。',
+    'alpha_numeric_space' => '{field}は半角英数字とスペースで入力してください。',
+    'is_unique'          => 'この{field}はすでに使われています。',
+    'is_not_unique'      => '{field}が見つかりません。',
+    'valid_ip'           => '{field}を正しいIPアドレスで入力してください。',
+    'valid_json'         => '{field}を正しいJSON形式で入力してください。',
+    'uploaded'           => '{field}をアップロードしてください。',
+    'max_size'           => '{field}のファイルサイズが大きすぎます。',
+    'max_dims'           => '{field}の画像サイズが大きすぎます。',
+    'is_image'           => '{field}は画像ファイルを選択してください。',
+    'mime_in'            => '{field}のファイル形式が正しくありません。',
+    'ext_in'             => '{field}のファイル拡張子が正しくありません。',
+    'string'             => '{field}は文字列で入力してください。',
+    'field_exists'       => '{field}が必要です。',
+];

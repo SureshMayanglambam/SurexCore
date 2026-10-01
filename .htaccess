@@ -1,0 +1,15 @@
+# For shared hosting where the domain's document root cannot point to /public.
+# Every request is served from /public, so App/, View/, vendor/, writable/ and .env
+# are never reachable from the web. Not used when the document root is /public.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Fallback if mod_rewrite is unavailable: refuse everything rather than expose files.
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>
+
+Options -Indexes

@@ -1,0 +1,49 @@
+name: surexcore
+
+services:
+  app:
+    build: ./docker
+    container_name: surexcore-app
+    ports:
+      - "8095:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      CI_ENVIRONMENT: development
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: surexcore-db
+    environment:
+      MYSQL_DATABASE: surexcore
+      MYSQL_USER: surexcore
+      MYSQL_PASSWORD: surexcore_secret
+      MYSQL_ROOT_PASSWORD: root_secret
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3308:3306"
+
+  # Local mail catcher: the CMS sends to mail:1025, read the mail at http://localhost:8026
+  mail:
+    image: axllent/mailpit:latest
+    container_name: surexcore-mail
+    ports:
+      - "8026:8025"
+      - "1026:1025"
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: surexcore-pma
+    environment:
+      PMA_HOST: db
+    ports:
+      - "8082:80"
+    depends_on:
+      - db
+
+volumes:
+  dbdata:
