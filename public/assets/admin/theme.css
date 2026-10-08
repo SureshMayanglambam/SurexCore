@@ -415,7 +415,12 @@ a:hover { color: var(--forest-700); text-decoration: none; }
 .login-page {
     background: var(--canvas) !important;
     position: relative;
-    overflow: hidden;
+    /* Grow with the content and scroll (the installer is taller than the screen); short pages stay centered. */
+    height: auto !important;
+    min-height: 100vh;
+    padding: 2rem 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .login-page::before, .login-page::after {
     content: ''; position: fixed; width: 420px; height: 420px; border-radius: 50%;
