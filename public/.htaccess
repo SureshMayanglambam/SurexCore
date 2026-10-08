@@ -31,7 +31,9 @@ Options -Indexes
 	# request to the front controller, index.php
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteRule ^([\s\S]*)$ index.php/$1 [L,NC,QSA]
+	# "index.php?/" (not "index.php/"): works on FastCGI / PHP-FPM hosts too, which otherwise answer
+	# "No input file specified." on every page except the top page. Routing reads REQUEST_URI.
+	RewriteRule ^([\s\S]*)$ index.php?/$1 [L,NC,QSA]
 
 	# Ensure Authorization header is passed along
 	RewriteCond %{HTTP:Authorization} .

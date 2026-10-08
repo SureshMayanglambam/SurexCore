@@ -46,24 +46,38 @@ Version 0.1.0 (developer preview) · Developed by Wonderful Door
 
 ## Get SurexCore
 
-| | `vendor/` (CodeIgniter) | Next step |
-|---|---|---|
-| **Release zip** `SurexCore-x.y.z.zip` | ✅ included | Nothing — Composer isn't needed |
-| **Git clone** of this repository | ❌ not in Git | `composer install` once (or with Docker: `docker compose exec app composer install`) |
+### Start a new project — one command
 
 ```bash
-git clone https://github.com/SureshMayanglambam/SurexCore.git
-cd SurexCore
-composer install
+composer create-project sureshmayanglambam/surexcore my-site
 ```
 
-Without `vendor/` the site can't start (PHP reports that `vendor/codeigniter4/framework/system/Boot.php` is missing).
+That's it: `my-site/` contains SurexCore with CodeIgniter 4 and BladeOne already in `vendor/`. Then:
+
+```bash
+cd my-site
+php spark serve          # → http://localhost:8080 — the installer opens
+```
+
+The **installer** (in the browser) asks for the database, site name and the first 管理者 account, then creates `.env` with a new encryption key, builds all tables and logs you in.
+No command line is needed on the server later — see [Deploying](#deploying-to-shared-hosting).
+
+### Other ways
+
+| Way | Command | `vendor/` |
+|---|---|---|
+| **Composer** (recommended) | `composer create-project sureshmayanglambam/surexcore my-site` | installed automatically |
+| **Release zip** — no Composer at all | download `SurexCore-x.y.z.zip` from [Releases](https://github.com/SureshMayanglambam/SurexCore/releases) and extract it | included |
+| **Git clone** — to work on SurexCore itself | `git clone https://github.com/SureshMayanglambam/SurexCore.git my-site && cd my-site && composer install` | after `composer install` |
+
+Without `vendor/` the site can't start; SurexCore then shows a page explaining how to fix it.
 
 ## Quick start (Docker)
 
 ```bash
+composer create-project sureshmayanglambam/surexcore my-site
+cd my-site
 docker compose up -d
-docker compose exec app composer install      # only for a Git clone (the zip already has vendor/)
 ```
 
 | URL | What |
@@ -87,7 +101,7 @@ The `docker/` folder and `docker-compose.yml` are **optional**: they are only us
 
 ## Quick start (MAMP / XAMPP / shared hosting)
 
-1. Put the project folder in the web root (e.g. `htdocs/surexcore/`). From a Git clone, run `composer install` first.
+1. Create the project inside the web root (`cd /Applications/MAMP/htdocs && composer create-project sureshmayanglambam/surexcore my-site`), or extract the release zip there.
 2. Create an empty MySQL database.
 3. Open the site in the browser (e.g. `http://localhost:8888/surexcore/`). The installer asks for the database,
    site name and the first admin account, then writes `.env` (with a new encryption key), creates all tables and logs you in.
@@ -406,6 +420,7 @@ Upload and extract the zip over `public_html/`. Code, templates and assets are r
 | **500**, log says `Access denied for user ''@'localhost'` | `.env` not read: wrong name/location or `●●` left → `public_html/.env`, exact name `.env` |
 | **500**, `Access denied for user 'u…'` | Wrong DB name/user/password → copy them exactly from the hosting panel |
 | **500** right after upload | Read `writable/logs/log-YYYY-MM-DD.log`; check PHP is 8.2+ and `writable/` is writable |
+| **No input file specified.** on every page except the top page | FastCGI/PHP-FPM host + an old `public/.htaccess` → the rewrite rule must be `index.php?/$1` (with `?`), as in SurexCore 0.1.0 |
 | `vendor/…/Boot.php` missing | `vendor/` not uploaded → use the release/deploy zip, or `composer install` |
 | Images broken after moving a site | `public/uploads/` not copied, or `app.baseURL` still points to the old URL |
 | Import error `#3730 Cannot drop table … foreign key` | Old dump format → re-export with `./deploy.sh full` or 設定 → バックアップ (or untick 「外部キーのチェックを有効にする」 in phpMyAdmin) |

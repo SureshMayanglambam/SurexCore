@@ -1,7 +1,8 @@
 <header class="site-header">
     <div class="container site-header__inner">
         <a class="site-logo" href="{{ url('/') }}">
-            @if(setting('site_logo'))
+            {{-- No database before installation (e.g. a 404 page then) --}}
+            @if(service('installer')->isInstalled() && setting('site_logo'))
                 <img src="{{ media_url(setting('site_logo')) }}" alt="">
             @endif
             <span>{{ $site->name }}</span>
