@@ -3,6 +3,7 @@
 namespace App\Admin;
 
 use App\Libraries\DatabaseExport;
+use App\Libraries\DeployPackage;
 use App\Model\SettingModel;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -61,6 +62,49 @@ class Backup extends AdminController
         register_shutdown_function(static fn () => @unlink($file));
 
         return $this->response->download($file, null)->setFileName(basename($file));
+    }
+
+    /**
+     * デプロイ用パッケージ: the files to upload to a server, in one zip (see App\Libraries\DeployPackage).
+     *   site: program + vendor + data + .env template (first deploy)    code: program + vendor (updates)
+     */
+    public function package(): DownloadResponse|RedirectResponse
+    {
+        $type = $this->request->getPost('type') === 'code' ? 'code' : 'site';
+
+        if (! class_exists(\ZipArchive::class)) {
+            return redirect()->route('admin.backup')->with('error', 'サーバーで ZIP 機能（PHP zip 拡張）が使えないため、パッケージを作成できません。');
+        }
+        if (! is_file(ROOTPATH . 'vendor/autoload.php')) {
+            return redirect()->route('admin.backup')->with('error', 'vendor フォルダがありません。composer install を実行してください。');
+        }
+
+        @set_time_limit(0);
+        $dir = WRITEPATH . 'backups/';
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $this->removeOldFiles($dir);
+
+        $name = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower((string) parse_url(base_url(), PHP_URL_HOST))), '-') ?: 'site';
+        $base = $dir . $name . '-backup-deploy-' . $type . '-' . date('Ymd-His');
+        $sql  = '';
+
+        if ($type === 'site') {
+            $sql = $base . '.sql';
+            (new DatabaseExport(db_connect()))->toFile($sql, self::KEEP_EXISTING);
+        }
+
+        $file = $base . '.zip';
+        (new DeployPackage())->build($file, $type, $sql);
+        if ($sql !== '') {
+            @unlink($sql);
+        }
+
+        log_activity('backup.deploy', $type === 'site' ? 'デプロイ用パッケージ（初回公開用）をダウンロードしました' : 'デプロイ用パッケージ（更新用）をダウンロードしました');
+        register_shutdown_function(static fn () => @unlink($file));
+
+        return $this->response->download($file, null)->setFileName(str_replace('-backup-deploy-', '-deploy-', basename($file)));
     }
 
     /**

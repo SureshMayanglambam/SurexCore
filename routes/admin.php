@@ -97,5 +97,6 @@ $routes->group(config('Cms')->adminPath, ['filter' => 'dbupgrade'], static funct
         // バックアップ: download the database (+ uploads)
         $routes->get('backup', [Backup::class, 'index'], ['as' => 'admin.backup']);
         $routes->post('backup', [Backup::class, 'download'], ['as' => 'admin.backup.download']);
+        $routes->post('backup/package', [Backup::class, 'package'], ['as' => 'admin.backup.package']);
     });
 });

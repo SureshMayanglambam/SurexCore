@@ -104,4 +104,20 @@ class Cookie extends BaseConfig
      * @see https://tools.ietf.org/html/rfc2616#section-2.2
      */
     public bool $raw = false;
+
+    /**
+     * On HTTPS every cookie (session included) is "Secure": never sent over plain HTTP.
+     * Also behind a proxy / CDN that terminates SSL (X-Forwarded-Proto).
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $https = (! empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+            || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+
+        if ($https) {
+            $this->secure = true;
+        }
+    }
 }

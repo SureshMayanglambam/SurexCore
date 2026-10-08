@@ -152,6 +152,8 @@ class Media extends AdminController
         }
 
         $file->move(FCPATH . $dir, $name);
+        // Images: strip metadata (GPS location, ...) and anything hidden in the file.
+        (new \App\Libraries\ImageCleaner())->clean(FCPATH . $dir . '/' . $name, $mime);
         $path = $dir . '/' . $name;
         $id   = model(MediaModel::class)->register($path, $file->getClientName(), (int) current_user()->id);
 

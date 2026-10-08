@@ -20,7 +20,7 @@ class Cms extends BaseConfig
     /**
      * CMS version shown in the admin footer.
      */
-    public string $version = '0.1.1';
+    public string $version = '0.1.2';
 
     /**
      * Product name and developer credit (welcome page). Constants: only changeable here in the code.

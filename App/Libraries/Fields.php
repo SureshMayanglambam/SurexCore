@@ -467,7 +467,8 @@ class Fields
                     $errors[] = "{$where}は255文字以内で入力してください。長い文章にはテキストエリアのフィールドを使用してください。";
                 }
 
-                return $value;
+                // Editor HTML: no scripts, event handlers or javascript: links (see HtmlSanitizer).
+                return $field['type'] === 'editor' ? (new HtmlSanitizer())->clean($value) : $value;
 
             case 'number':
                 if ($raw === null || $raw === '') {

@@ -1,8 +1,14 @@
-# Uploaded files are data only: never execute anything in this folder.
-Options -Indexes -ExecCGI
-<FilesMatch "\.(php\d?|phtml|phar|pl|py|cgi|sh|shtml|htaccess)$">
+# Uploaded files: served as plain files, never executed or interpreted.
+
+Options -Indexes -ExecCGI -Includes
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .pl .py .cgi .shtml
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+
+# Scripts and markup are never served from here (the admin only accepts images and documents anyway).
+<FilesMatch "(?i)\.(php\d?|phtml|phar|pl|py|cgi|sh|shtml|html?|xhtml|svgz?|xml|js|mjs|css|swf|htaccess)$">
     Require all denied
 </FilesMatch>
+
 <IfModule mod_php.c>
     php_flag engine off
 </IfModule>
@@ -12,6 +18,11 @@ Options -Indexes -ExecCGI
 <IfModule mod_php8.c>
     php_flag engine off
 </IfModule>
+
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
+    # Documents are downloaded, not opened inside the site (images and PDFs are still shown).
+    <FilesMatch "(?i)\.(docx?|xlsx?|pptx?|zip|csv|txt)$">
+        Header set Content-Disposition "attachment"
+    </FilesMatch>
 </IfModule>

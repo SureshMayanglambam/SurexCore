@@ -50,7 +50,9 @@ class Branding extends AdminController
         }
 
         $name = 'logo-' . bin2hex(random_bytes(6)) . '.' . $ext;
+        $mime = $file->getMimeType();
         $file->move(FCPATH . self::DIR, $name);
+        (new \App\Libraries\ImageCleaner())->clean(FCPATH . self::DIR . '/' . $name, $mime);
 
         $this->removeFile(setting('site_logo', ''));
         model(SettingModel::class)->put('site_logo', self::DIR . '/' . $name);

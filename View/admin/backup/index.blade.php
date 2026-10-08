@@ -54,11 +54,45 @@
             </div>
         </div>
     </div>
+
+    <div class="card mt-4 mb-0">
+        <div class="card-header">
+            <h3 class="card-title"><i class="bi bi-cloud-arrow-up me-1"></i> サーバーにアップロード（デプロイ）</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-secondary small mb-3">
+                サーバーに必要なファイルだけをまとめた zip です（.env・ログ・キャッシュ・開発用ファイルは含みません）。
+                中身を公開フォルダ（public_html など）に展開し、zip 内の <code>_deploy/README.txt</code> の手順に従ってください。
+            </p>
+            <form method="post" action="{{ url_to('admin.backup.package') }}" class="row g-3 deploy-form">
+                @csrf
+                <div class="col-md-6 d-grid">
+                    <button type="submit" name="type" value="site" class="btn btn-primary text-start py-3">
+                        <i class="bi bi-box-seam me-2"></i> 初回公開用（サイト一式）
+                        <span class="d-block small fw-normal opacity-75 mt-1">プログラム＋データベース＋画像＋サーバー用 .env のひな形</span>
+                    </button>
+                </div>
+                <div class="col-md-6 d-grid">
+                    <button type="submit" name="type" value="code" class="btn btn-outline-secondary text-start py-3">
+                        <i class="bi bi-arrow-repeat me-2"></i> 更新用（プログラムのみ）
+                        <span class="d-block small fw-normal opacity-75 mt-1">公開後の更新に。サーバーのデータ・画像・.env はそのまま残ります</span>
+                    </button>
+                </div>
+            </form>
+            <p class="small text-danger mt-3 mb-0">
+                <i class="bi bi-exclamation-triangle"></i> 公開後は「初回公開用」を使わないでください（サーバーのデータが上書きされます）。
+            </p>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
 <script>
     // The download starts after the file is built: show that something is happening.
+    document.querySelector('.deploy-form').addEventListener('submit', e => {
+        e.target.querySelectorAll('button').forEach(b => b.classList.add('disabled'));
+        setTimeout(() => e.target.querySelectorAll('button').forEach(b => b.classList.remove('disabled')), 8000);
+    });
     document.getElementById('backup-form').addEventListener('submit', e => {
         const status = document.getElementById('backup-status');
         status.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> バックアップを作成しています。ダウンロードが始まるまでお待ちください…';

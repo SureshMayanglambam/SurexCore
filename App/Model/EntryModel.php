@@ -76,8 +76,17 @@ class EntryModel extends Model
     {
         if (is_string($type)) {
             $slug = $type;
-            $type = model(ContentTypeModel::class)->findBySlug($slug)
-                ?? throw new RuntimeException("Unknown content type \"{$slug}\". Create it under Settings → Content Types.");
+            $type = model(ContentTypeModel::class)->findBySlug($slug);
+
+            if ($type === null) {
+                // Live site: a page whose content type doesn't exist (yet) is simply not found.
+                if (ENVIRONMENT === 'production') {
+                    throw PageNotFoundException::forPageNotFound();
+                }
+
+                throw new RuntimeException("Unknown content type \"{$slug}\". Create it under 設定 → コンテンツタイプ"
+                    . ($slug === 'news' ? ' (sample: php spark db:seed NewsSample).' : '.'));
+            }
         }
 
         $this->contentType   = $type;

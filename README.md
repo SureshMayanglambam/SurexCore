@@ -11,7 +11,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.1 (developer preview) · Developed by Wonderful Door
+Version 0.1.2 (developer preview) · Developed by Wonderful Door
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -119,7 +119,8 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 | Media | Media library (grid, search, drag & drop upload, where-used, delete), "メディアから選択" in every image/file field, CKEditor 5 image upload |
 | Site | Blade frontend you write yourself, contact form (入力 → 確認 → 完了) with **file attachment** and mail templates, automatic `sitemap.xml` / `robots.txt`, noindex switch, maintenance mode |
 | Admin | Japanese UI, roles 管理者 / Web管理者, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
-| Ops | Installer, automatic migrations, hidden admin URL, `deploy.sh` packages for shared hosting |
+| Ops | Installer, automatic migrations, hidden admin URL, **one-click deploy packages** in the admin (or `deploy.sh`) |
+| Security | Hardened `.htaccess` (no code in uploads, no source/config files served), strict headers + admin CSP, Secure cookies, sanitized editor HTML, metadata-free images — see [Security](#security) |
 
 ## Folder structure
 
@@ -403,7 +404,7 @@ model(InquiryModel::class)->store('recruit', ['お名前' => $name, …], $name,
 | ブランディング | all | site logo (`setting('site_logo')`) |
 | 設定 → 一般設定 | 管理者 | site name, date format, maintenance mode, **検索エンジンにインデックスさせない**, test mail |
 | 設定 → ユーザー / コンテンツタイプ / 操作ログ | 管理者 | users and roles, content types, activity log |
-| 設定 → バックアップ | 管理者 | download the database (.sql) or database + uploads (.zip) — restore with phpMyAdmin |
+| 設定 → バックアップ | 管理者 | download the database (.sql) or database + uploads (.zip); **deploy packages** for the server (初回公開用 / 更新用) |
 
 ## Configuration (.env)
 
@@ -450,7 +451,16 @@ public_html/
 
 ### 2. Build the upload package
 
-With Docker running locally, `deploy.sh` builds the zip (production `vendor/` included):
+**One click, no commands:** 設定 → バックアップ → 「サーバーにアップロード（デプロイ）」
+
+| Button | Contents |
+|---|---|
+| 初回公開用（サイト一式） | program + `vendor/` + `public/uploads/` + `_deploy/database.sql` + `_deploy/env-server.txt` (your settings with a **new encryption key**; passwords left as ●●) + `_deploy/README.txt` |
+| 更新用（プログラムのみ） | program + `vendor/` — the server's database, uploads and `.env` are untouched |
+
+Only what the server needs is packed (`.htaccess`, `App/`, `View/`, `routes/`, `public/`, `vendor/`, `writable/` folders, `spark`, `composer.*`): never `.env`, logs, cache, sessions, `.git`, `docker/` or your own notes. Extract the zip into the document root, follow `_deploy/README.txt`, then delete `_deploy/`.
+
+**From the command line** (Docker running locally), `deploy.sh` builds the same kind of zip:
 
 ```bash
 ./deploy.sh fresh   # new empty site — the installer runs on the server
@@ -527,12 +537,26 @@ Upload and extract the zip over `public_html/`. Code, templates and assets are r
 
 ## Security
 
-- CSRF on every POST/PUT/DELETE; Blade escapes output by default
-- `password_hash()`, login rate limiting (5/min per IP), session regeneration on login
-- Hidden admin URL (`cms.adminPath`), admin pages are `noindex`
-- `/install` locked after installation; uploads checked by content type, random file names
-- Activity log of logins (incl. failures) and changes, pruned automatically
-- No plugin system — no third-party plugin code to attack
+**Server (`.htaccess`)**
+- Only `public/` is reachable; `App/`, `View/`, `routes/` and `writable/` also deny access on their own.
+- `public/`: hidden files (`.env`, `.git`, `.htaccess`) and source/config/backup files (`.scss`, `.map`, `.sql`, `.log`, `.ini`, `composer.*`, `prepros.config`, …) return 403; no directory listing.
+- `public/uploads/`: PHP and other scripts never run; HTML/SVG/XML/JS/CSS are never served; documents are downloaded (`Content-Disposition: attachment`) with `nosniff`.
+
+**Headers** (`App/Filters/SecurityHeaders.php` + `.htaccess` for static files)
+- `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, HSTS on HTTPS; no `X-Powered-By`.
+- Admin panel: a strict Content-Security-Policy (own files only), `Cache-Control: no-store`, `X-Robots-Tag: noindex`. The website has no CSP by default — add your own once you know which scripts it loads.
+
+**Application**
+- CSRF on every POST/PUT/DELETE (token masked against BREACH); Blade escapes output by default.
+- Cookies `HttpOnly`, `SameSite=Lax`, and `Secure` automatically on HTTPS; neutral session cookie name; old session destroyed on login.
+- `password_hash()` (rehashed when PHP's default changes), passwords ≥ 10 characters, login rate limiting (5/min per IP), generic login errors.
+- Hidden admin URL (`cms.adminPath`); `/install` locked after installation; errors hidden in production.
+- Editor (CKEditor) HTML is sanitized on save: no `<script>`, `<iframe>`, forms, SVG, `on…=` handlers or `javascript:`/`data:` links (`App/Libraries/HtmlSanitizer.php`).
+- Uploads: type detected from the contents, random file names, no SVG; images are re-encoded — EXIF/GPS metadata and hidden payloads removed, photos turned upright (`App/Libraries/ImageCleaner.php`).
+- Contact attachments and saved inquiries are stored outside the web root; downloads only for logged-in admins.
+- Activity log of logins (incl. failures) and changes; no plugin system — no third-party plugin code to attack.
+
+**On every live site:** `CI_ENVIRONMENT = production`, HTTPS with `app.forceGlobalSecureRequests = true`, a unique `cms.adminPath`, strong passwords, regular `composer update` and backups.
 
 ## License
 
