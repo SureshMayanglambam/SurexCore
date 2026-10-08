@@ -17,6 +17,8 @@
             case 'radio':    return q('input[type=radio]:checked')?.value ?? '';
             case 'toggle':   return q('input[type=checkbox]').checked ? '1' : '0';
             case 'select':   return q('select').value;
+            case 'relation': return q('select') ? q('select').value
+                                 : [...wrapper.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value);
             case 'image':
             case 'file':     return q('.fld-upload-value').value;
             case 'editor':   return window.wdEditors?.getData(q('textarea')) ?? q('textarea').value;

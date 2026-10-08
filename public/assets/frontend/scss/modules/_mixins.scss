@@ -1,0 +1,19 @@
+@use "variables" as *;
+
+// ==========================
+// Responsive
+// ==========================
+
+// max-width: 991px
+@mixin tab {
+    @media screen and (max-width: $bp-tab) {
+        @content;
+    }
+}
+
+// max-width: 768px
+@mixin sp {
+    @media screen and (max-width: $bp-sp) {
+        @content;
+    }
+}

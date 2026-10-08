@@ -91,6 +91,31 @@ class Entry extends Entity
     }
 
     /**
+     * Linked entries of a relation field (published only, in the order chosen in the admin):
+     *   {{ $post->relation('shop')->title }}                 single  → Entry or null
+     *   @foreach($post->relation('tags') as $tag) … @endforeach   multiple → list of Entry
+     */
+    public function relation(string $path): Entry|array|null
+    {
+        $definition = $this->store?->fieldDefinition($path) ?? [];
+        $ids        = array_map('intval', (array) $this->field($path, []));
+        $multiple   = ! empty($definition['multiple']);
+        $slug       = (string) ($definition['related_type'] ?? '');
+
+        if ($ids === [] || $slug === '' || ! content_type_exists($slug)) {
+            return $multiple ? [] : null;
+        }
+
+        $found = [];
+        foreach (\App\Model\EntryModel::for($slug)->published()->whereIn('id', $ids)->findAll() as $entry) {
+            $found[(int) $entry->id] = $entry;
+        }
+        $ordered = array_values(array_filter(array_map(static fn ($id) => $found[$id] ?? null, $ids)));
+
+        return $multiple ? $ordered : ($ordered[0] ?? null);
+    }
+
+    /**
      * Custom field columns come back typed (numbers, booleans, checkbox arrays, editor HTML with
      * this site's URLs). Repeaters and groups are not columns: $item->faq, $item->company.
      */

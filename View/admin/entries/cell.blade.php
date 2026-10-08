@@ -33,6 +33,15 @@
         @endforelse
         @break
 
+    @case('relation')
+        @php $titles = service('fields')->relationOptions($field['related_type']); @endphp
+        @forelse((array) $value as $relatedId)
+            <span class="badge text-bg-light border">{{ $titles[$relatedId] ?? '#' . $relatedId }}</span>
+        @empty
+            <span class="text-secondary">—</span>
+        @endforelse
+        @break
+
     @case('toggle')
         @if($value)
             <i class="bi bi-check-circle-fill text-success" title="はい" aria-label="はい"></i>

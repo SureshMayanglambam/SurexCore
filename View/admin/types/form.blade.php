@@ -81,7 +81,8 @@
                      data-types="{{ json_encode($fieldTypes, JSON_UNESCAPED_UNICODE) }}"
                      data-operators="{{ json_encode($operators, JSON_UNESCAPED_UNICODE) }}"
                      data-saved-keys="{{ json_encode($savedKeys) }}"
-                     data-reserved="{{ json_encode($reserved) }}"></div>
+                     data-reserved="{{ json_encode($reserved) }}"
+                     data-content-types="{{ json_encode($contentTypeOptions, JSON_UNESCAPED_UNICODE) }}"></div>
                 <input type="hidden" name="fields_json" value="">
                 <input type="hidden" name="confirm_drop" value="">
 

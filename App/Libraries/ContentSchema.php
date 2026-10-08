@@ -23,7 +23,7 @@ class ContentSchema
     /** Columns every content type table has. Field names may not use these. */
     public const BASE_COLUMNS = [
         'id', 'title', 'slug', 'status', 'author_id', 'meta_title', 'meta_description',
-        'published_at', 'created_at', 'updated_at', 'deleted_at',
+        'published_at', 'published_until', 'created_at', 'updated_at', 'deleted_at',
     ];
 
     /** Columns every repeater table has. */
@@ -47,6 +47,7 @@ class ContentSchema
         'date'     => 'date',
         'toggle'   => 'bool',
         'checkbox' => 'json',
+        'relation' => 'json',
     ];
 
     /** Storage that can be widened in place without losing data. */
@@ -356,6 +357,7 @@ class ContentSchema
                 'meta_title'       => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
                 'meta_description' => ['type' => 'VARCHAR', 'constraint' => 500, 'null' => true],
                 'published_at'     => ['type' => 'DATETIME', 'null' => true],
+                'published_until'  => ['type' => 'DATETIME', 'null' => true],
             ] + $columns + [
                 'created_at'       => ['type' => 'DATETIME', 'null' => true],
                 'updated_at'       => ['type' => 'DATETIME', 'null' => true],
@@ -470,7 +472,7 @@ class ContentSchema
     {
         return match ($field['type']) {
             'toggle'   => $value ? 1 : 0,
-            'checkbox' => $value ? json_encode(array_values((array) $value), JSON_UNESCAPED_UNICODE) : null,
+            'checkbox', 'relation' => $value ? json_encode(array_values(array_map('strval', (array) $value)), JSON_UNESCAPED_UNICODE) : null,
             'number'   => is_numeric($value) ? $value + 0 : null,
             'editor'   => $value === '' || $value === null ? null : $this->tokenizeUrls((string) $value),
             default    => $value === '' || $value === null ? null : (string) $value,
@@ -481,7 +483,7 @@ class ContentSchema
     {
         return match ($field['type']) {
             'toggle'   => (bool) $value,
-            'checkbox' => $value ? (json_decode((string) $value, true) ?: []) : [],
+            'checkbox', 'relation' => $value ? (json_decode((string) $value, true) ?: []) : [],
             'number'   => $value === null ? null : ((float) $value == (int) $value ? (int) $value : (float) $value),
             'editor'   => $value === null ? '' : $this->expandUrls((string) $value),
             default    => $value ?? '',

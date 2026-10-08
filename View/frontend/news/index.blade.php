@@ -1,37 +1,48 @@
-{{-- SAMPLE VIEW — list of お知らせ (App/Controller/News.php::index) --}}
 @extends('frontend.layout.default')
 
 @section('title', 'お知らせ | ' . $site->name)
 @section('description', $site->name . 'のお知らせ一覧です。')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/frontend/css/news.css') }}">
+@endpush
+
 @section('content')
+<div class="sx-news">
+    <div class="container">
+        <h1 class="sx-news__title">お知らせ</h1>
 
-    <section class="page-header">
-        <div class="container">
-            <h1>お知らせ</h1>
-            <p>News</p>
-        </div>
-    </section>
+        @if(count($posts))
+            <ul class="sx-news__list">
+                @foreach($posts as $post)
+                    <li>
+                        <a href="{{ url_to('news.detail', $post->slug) }}">
+                            {{-- Image --}}
+                            @if($post->news_image)
+                                <img src="{{ media_url($post->news_image) }}" alt="" loading="lazy">
+                            @endif
+                            <div>
+                                <time datetime="{{ $post->published_at }}">{{ format_date($post->published_at) }}</time>
+                                {{-- Radio: label of the stored value --}}
+                                <span class="sx-news__type">{{ $post->label('news_type') }}</span>
+                                {{-- On/off --}}
+                                @if($post->news_pickup)
+                                    <span class="sx-news__badge">ピックアップ</span>
+                                @endif
+                                {{-- Text --}}
+                                <h2>{{ $post->news_title }}</h2>
+                                {{-- Textarea: escape, keep line breaks --}}
+                                <p>{!! nl2br(esc($post->news_summary)) !!}</p>
+                            </div>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
 
-    <section class="section">
-        <div class="container">
-            @if(count($items))
-                <ul class="news-list">
-                    @foreach($items as $item)
-                        <li>
-                            <a href="{{ url_to('news.detail', $item->slug) }}">
-                                <time datetime="{{ $item->published_at }}">{{ format_date($item->published_at) }}</time>
-                                <span>{{ $item->title }}</span>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-
-                {!! $pager->links() !!}
-            @else
-                <p>お知らせはまだありません。管理画面の「お知らせ」から投稿を追加してください。</p>
-            @endif
-        </div>
-    </section>
-
+            {!! pagination() !!}
+        @else
+            <p>お知らせはまだありません。</p>
+        @endif
+    </div>
+</div>
 @endsection

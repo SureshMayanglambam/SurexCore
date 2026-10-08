@@ -86,6 +86,12 @@
                                    value="{{ old('published_at', !empty($item->published_at) ? date('Y-m-d\TH:i', strtotime($item->published_at)) : '') }}">
                             <div class="form-text">空欄の場合はすぐに公開されます。未来の日時を指定すると予約投稿になります。</div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="published_until">公開終了日時 <span class="text-secondary small">（任意）</span></label>
+                            <input id="published_until" type="datetime-local" name="published_until" class="form-control"
+                                   value="{{ old('published_until', !empty($item->published_until) ? date('Y-m-d\TH:i', strtotime($item->published_until)) : '') }}">
+                            <div class="form-text">空欄の場合は無期限で公開されます。設定すると、この日時から非公開になります。</div>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> {{ $item ? '更新' : '保存' }}</button>
                             {{-- Opens the frontend page with the current (unsaved) content in a new tab --}}

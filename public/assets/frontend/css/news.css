@@ -1,0 +1,29 @@
+/* お知らせ sample (View/frontend/news/) */
+.sx-news { padding: 60px 0 80px; line-height: 1.8; }
+.sx-news a { color: inherit; }
+.sx-news__title { font-size: 2rem; margin-bottom: 1.5rem; }
+.sx-news__pickup { background: #f6f8f7; border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
+.sx-news__pickup h2 { font-size: 1rem; margin: 0 0 .4rem; }
+.sx-news__pickup ul { margin: 0; padding-left: 1.2rem; }
+.sx-news__filter { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-bottom: 1.5rem; font-size: .9rem; }
+.sx-news__filter a { text-decoration: none; color: #5d6b64; }
+.sx-news__filter a.is-current { color: #0f3d2e; font-weight: 700; text-decoration: underline; }
+.sx-news__list { list-style: none; padding: 0; margin: 0 0 2rem; border-top: 1px solid #e4ebe7; }
+.sx-news__list a { display: flex; gap: 1.5rem; padding: 1.25rem 0; border-bottom: 1px solid #e4ebe7; text-decoration: none; }
+.sx-news__list img { width: 160px; height: 100px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.sx-news__list h2 { font-size: 1.1rem; margin: .2rem 0; }
+.sx-news__list p { margin: 0; color: #5d6b64; font-size: .9rem; }
+.sx-news__list time, .sx-news__article time { color: #5d6b64; font-size: .9rem; margin-right: .6rem; }
+.sx-news__type { display: inline-block; font-size: .75rem; padding: .1em .7em; border-radius: 999px; background: #0f3d2e; color: #fff; }
+.sx-news__badge { display: inline-block; font-size: .75rem; padding: .1em .7em; border-radius: 999px; background: #b4f105; color: #0f3d2e; margin-left: .3rem; }
+.sx-news__article { max-width: 800px; }
+.sx-news__article h1 { font-size: 1.8rem; margin: .6rem 0; }
+.sx-news__tags { display: flex; gap: .6rem; list-style: none; padding: 0; color: #1f6b4f; font-size: .9rem; }
+.sx-news__image { width: 100%; border-radius: 12px; margin: 1rem 0; }
+.sx-news__summary { background: #f6f8f7; padding: 1rem 1.25rem; border-radius: 8px; }
+.sx-news__related { margin-top: 3rem; border-top: 1px solid #e4ebe7; padding-top: 1rem; }
+.sx-news__related h2 { font-size: 1.1rem; }
+@media (max-width: 767px) { .sx-news__list a { flex-direction: column; } .sx-news__list img { width: 100%; height: 180px; } }
+.sx-news__links { margin-top: 2.5rem; padding: 1.25rem 1.5rem; background: #f6f8f7; border-radius: 12px; }
+.sx-news__links h2 { font-size: 1.05rem; margin: 0 0 .5rem; }
+.sx-news__links ul { margin: 0; padding-left: 1.2rem; }

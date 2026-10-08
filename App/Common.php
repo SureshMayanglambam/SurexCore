@@ -97,6 +97,16 @@ if (! function_exists('content_type_exists')) {
     }
 }
 
+if (! function_exists('pagination')) {
+    /**
+     * Page links of the last paginate() call, in a view: {!! pagination() !!}
+     */
+    function pagination(string $group = 'default'): string
+    {
+        return service('pager')->links($group);
+    }
+}
+
 if (! function_exists('format_date')) {
     /**
      * Format a date with the site's date format (Settings → General).
@@ -203,6 +213,10 @@ if (! function_exists('send_mail')) {
         }
         $email->setSubject($subject);
         $email->setMessage($html);
+        // Files: 'attachments' => [[$path, $fileNameInTheMail], ...]
+        foreach ($options['attachments'] ?? [] as [$path, $name]) {
+            $email->attach($path, 'attachment', $name);
+        }
 
         if (! $email->send(false)) {
             log_message('error', 'Email to {to} failed: {debug}', [

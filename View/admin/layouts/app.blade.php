@@ -118,6 +118,15 @@
                             @endif
                         </li>
                     @endif
+                    @if(\App\Model\InquiryModel::enabled())
+                        @php $unreadInquiries = model(\App\Model\InquiryModel::class)->unreadCount(); @endphp
+                        <li class="nav-item">
+                            <a href="{{ url_to('admin.inquiries') }}" @class(['nav-link', 'active' => url_is(admin_path('inquiries*'))])>
+                                <i class="nav-icon bi bi-inbox"></i>
+                                <p>お問い合わせ @if($unreadInquiries)<span class="nav-badge badge text-bg-danger ms-auto">{{ $unreadInquiries }}</span>@endif</p>
+                            </a>
+                        </li>
+                    @endif
                     <li class="nav-item">
                         <a href="{{ url_to('admin.media') }}" @class(['nav-link', 'active' => url_is(admin_path('media*'))])>
                             <i class="nav-icon bi bi-images"></i><p>メディア</p>

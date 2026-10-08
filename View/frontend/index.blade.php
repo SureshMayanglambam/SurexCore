@@ -1,22 +1,24 @@
 {{-- Welcome page of the SurexCore starter. Replace this file with your site's top page. --}}
 @extends('frontend.layout.default')
 
-@section('title', 'Welcome to ' . $cms['name'])
-@section('description', $cms['name'] . ' — a lightweight CMS for shared hosting, built on CodeIgniter 4 and Blade.')
+@section('title', 'Welcome to ' . $site->name)
+@section('description', $site->name . ' — a lightweight CMS for shared hosting, built on CodeIgniter 4 and Blade.')
 @section('body_class', 'page-welcome')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontend/css/welcome.css') }}">
 @endpush
 
 @section('content')
+<div class="sx-welcome">
 
     <section class="hero">
         <div class="container">
             <span class="hero__badge">v{{ $cms['version'] }} · Developer Preview</span>
-            <h1 class="hero__title">Welcome to <span>{{ $cms['name'] }}</span></h1>
+            <h1 class="hero__title">Welcome to <span>{{ $site->name }}</span></h1>
             <p class="hero__lead">
-                {{ $cms['name'] }} is a lightweight, secure CMS for building websites on ordinary shared hosting.
+                {{ $site->name }} is a lightweight, secure CMS for building websites on ordinary shared hosting.
                 Build content types in the admin panel, and write the website in plain Blade — like Laravel, without the weight.
             </p>
             <div class="hero__actions">
@@ -29,7 +31,7 @@
 
     <section class="section">
         <div class="container">
-            <h2 class="section-title">What is {{ $cms['name'] }}?</h2>
+            <h2 class="section-title">What is {{ $site->name }}?</h2>
             <p class="section-lead">A WordPress alternative for sites you build yourself: no plugins, no theme layer — just your code and a friendly admin panel for your clients.</p>
 
             <div class="features">
@@ -122,8 +124,8 @@
     <section class="section">
         <div class="container about">
             <div>
-                <h2 class="section-title">About {{ $cms['name'] }}</h2>
-                <p>{{ $cms['name'] }} is a developer preview shared for feedback. It is built on CodeIgniter 4 with BladeOne templates and an admin panel in Japanese.
+                <h2 class="section-title">About {{ $site->name }}</h2>
+                <p>{{ $site->name }} is a developer preview shared for feedback. It is built on CodeIgniter 4 with BladeOne templates and an admin panel in Japanese.
                     Please report anything that feels wrong, is hard to use or is missing.</p>
             </div>
             <dl>
@@ -135,4 +137,5 @@
         </div>
     </section>
 
+</div>
 @endsection

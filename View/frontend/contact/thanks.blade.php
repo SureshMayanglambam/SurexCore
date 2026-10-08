@@ -3,7 +3,12 @@
 @section('title', 'お問い合わせ（送信完了） | ' . $site->name)
 @section('robots', 'noindex, nofollow')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/frontend/css/contact.css') }}">
+@endpush
+
 @section('content')
+<div class="sx-contact">
 
     <section class="page-header">
         <div class="container">
@@ -19,4 +24,5 @@
         </div>
     </section>
 
+</div>
 @endsection

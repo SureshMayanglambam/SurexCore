@@ -1,48 +1,77 @@
-{{--
-    The HTML page around every frontend view. A page fills it like this:
-
-    @extends('frontend.layout.default')
-    @section('title', 'About | ' . $site->name)     <title>; omit on the top page (site name + tagline)
-    @section('description', '…')                    meta description + og:description
-    @section('robots', 'noindex, nofollow')         default: index, follow
-    @section('og_image', media_url($item->photo))   optional share image
-    @section('body_class', 'page-about')
-    @push('styles') <link rel="stylesheet" href="…"> @endpush
-    @push('scripts') <script src="…"></script> @endpush
-    @section('content') … @endsection
---}}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', $site->name . ($site->tagline ? ' | ' . $site->tagline : ''))</title>
-    <meta name="description" content="@yield('description', $site->tagline)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{-- SEO --}}
+    <title>@yield('title', $site->name)</title>
+
+    <meta name="description" content="@yield('description', '')">
     <meta name="robots" content="@yield('robots', 'index, follow')">
-    <link rel="canonical" href="@yield('canonical', current_url())">
 
-    <meta property="og:type" content="@yield('og_type', 'website')">
+    {{-- Canonical URL --}}
+    <link rel="canonical" href="@yield('canonical', url()->current())">
+
+    {{-- Open Graph --}}
+    <meta property="og:locale" content="ja_JP">
     <meta property="og:site_name" content="{{ $site->name }}">
-    <meta property="og:title" content="@yield('title', $site->name)">
-    <meta property="og:description" content="@yield('description', $site->tagline)">
-    <meta property="og:url" content="{{ current_url() }}">
-    @hasSection('og_image')
-        <meta property="og:image" content="@yield('og_image')">
+    @if (url_is('/'))
+        <meta property="og:type" content="website">
+    @else
+        <meta property="og:type" content="article">
     @endif
+    <meta property="og:title" content="@yield('title', $site->name)">
+    <meta property="og:description" content="@yield('description', '')">
+    <meta property="og:url" content="@yield('canonical', url()->current())">
+    <meta property="og:image" content="@yield('og_image', asset('assets/frontend/images/ogp.jpg'))">
 
-    <link rel="stylesheet" href="{{ asset('assets/frontend/css/style.css') }}">
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', $site->name)">
+    <meta name="twitter:description" content="@yield('description', '')">
+    <meta name="twitter:image" content="@yield('og_image', asset('assets/frontend/images/ogp.jpg'))">
+
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+
+    {{--Font--}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+
+    {{-- Shared CSS --}}
+    <link rel="stylesheet" href="{{ asset('assets/frontend/lib/wow/animate.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/frontend/css/style.min.css') }}">
+
+    {{-- Page-specific CSS --}}
     @stack('styles')
+
+    {{-- Additional head content --}}
+    @yield('head')
 </head>
+
 <body class="@yield('body_class')">
+
+    {{-- Header --}}
     @include('frontend.layout.header')
 
+    {{-- Main Content --}}
     <main>
         @yield('content')
     </main>
 
+    {{-- Footer --}}
     @include('frontend.layout.footer')
 
-    <script src="{{ asset('assets/frontend/js/main.js') }}" defer></script>
+    {{-- Shared JS --}}
+    <script src="{{ asset('assets/frontend/lib/jquery/jquery-3.7.1.min.js') }}" defer></script>
+    <script src="{{ asset('assets/frontend/js/script.min.js') }}" defer></script>
+    <script src="{{ asset('assets/frontend/lib/wow/wow.min.js') }}" defer></script>
+    <script src="{{ asset('assets/frontend/lib/wow/init-wow.js') }}" defer></script>
+
+    {{-- Page-specific JS --}}
     @stack('scripts')
+
 </body>
 </html>

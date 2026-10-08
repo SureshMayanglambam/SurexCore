@@ -1,0 +1,132 @@
+/*********************************
+ Base
+**********************************/
+@use "modules" as m;
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+
+  &::before,
+  &::after {
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+html {
+  font-size: 62.5%;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  scroll-behavior: smooth;
+	scroll-padding-top: 100px;
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  background: m.$white;
+  color: m.$black;
+  font-size: m.$font-size-base;
+  font-family: m.$noto;
+  line-height: m.$line-height-base;
+  overscroll-behavior: auto;
+  	-webkit-font-smoothing: antialiased;
+	-webkit-text-size-adjust: none;
+	-webkit-overflow-scrolling: touch !important;
+	-moz-osx-font-smoothing: grayscale;
+
+  @include m.sp{
+    font-size: 1.4rem;
+  }
+}
+
+main {
+  overflow-x: hidden;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+  display: inline-block;
+}
+
+img{
+    width: 100%;
+    display: block;
+}
+
+/* Display formats */
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hidden{
+  display: none;
+  // hide on SP (768px and below)
+  &-sp{
+      @include m.sp {
+          display: none !important;
+      }
+  }
+  // hide on PC (992px and above)
+  &-pc{
+      @media screen and (min-width: #{m.$bp-tab + 1}) {
+          display: none !important;
+      }
+  }
+  // hide on TAB (769px - 991px)
+  &-tab{
+      @media screen and (min-width: #{m.$bp-sp + 1}) and (max-width: m.$bp-tab) {
+          display: none !important;
+      }
+  }
+  // hide on TAB + PC (769px and above)
+  &-tab-pc{
+      @media screen and (min-width: #{m.$bp-sp + 1}) {
+          display: none !important;
+      }
+  }
+  // hide on TAB + SP (991px and below)
+  &-tab-sp{
+      @include m.tab {
+          display: none !important;
+      }
+  }
+}
+
+/* Positioning */
+.relative {
+  position: relative;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* title */
+
+
+
+/* text */
+
+
+/* btn */
+
+
+/* Lower Mv */

@@ -71,14 +71,17 @@ class Backup extends AdminController
         $zip = new \ZipArchive();
         $zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $zip->addFile($sqlFile, 'database.sql');
-        $zip->addFromString('README.txt', "復元方法\n1. database.sql を phpMyAdmin でインポート\n2. uploads フォルダを public/uploads/ に戻す\n");
+        $zip->addFromString('README.txt', "復元方法\n1. database.sql を phpMyAdmin でインポート\n2. uploads フォルダを public/uploads/ に戻す\n3. inquiries フォルダ（お問い合わせの添付ファイル）があれば writable/uploads/inquiries/ に戻す\n");
 
-        $root = FCPATH . 'uploads';
-        if (is_dir($root)) {
+        // Uploaded media, and the attachments of saved お問い合わせ.
+        foreach ([FCPATH . 'uploads' => 'uploads/', WRITEPATH . 'uploads/inquiries' => 'inquiries/'] as $root => $prefix) {
+            if (! is_dir($root)) {
+                continue;
+            }
             $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
             foreach ($files as $f) {
                 if ($f->isFile()) {
-                    $local = 'uploads/' . str_replace('\\', '/', substr($f->getPathname(), strlen($root) + 1));
+                    $local = $prefix . str_replace('\\', '/', substr($f->getPathname(), strlen($root) + 1));
                     $zip->addFile($f->getPathname(), $local);
                     if (preg_match('/\.(jpe?g|png|gif|webp|zip|docx|xlsx|pptx)$/i', $local)) {
                         $zip->setCompressionName($local, \ZipArchive::CM_STORE);

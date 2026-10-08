@@ -11,7 +11,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.0 (developer preview) · Developed by Wonderful Door
+Version 0.1.1 (developer preview) · Developed by Wonderful Door
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -26,15 +26,17 @@ Version 0.1.0 (developer preview) · Developed by Wonderful Door
 5. [What's in the box](#whats-in-the-box)
 6. [Folder structure](#folder-structure)
 7. [The sample: route → controller → model → view](#the-sample-route--controller--model--view)
-8. [Content types and custom fields](#content-types-and-custom-fields)
-9. [Routing, views and Blade](#routing-views-and-blade)
-10. [Forms and mail](#forms-and-mail)
-11. [Admin panel features](#admin-panel-features)
-12. [Configuration (.env)](#configuration-env)
-13. [Database changes (automatic migrations)](#database-changes-automatic-migrations)
-14. [Deploying to shared hosting](#deploying-to-shared-hosting)
-15. [Security](#security)
-16. [Feedback](#feedback)
+8. [Generators](#generators)
+9. [Content types and custom fields](#content-types-and-custom-fields)
+10. [Routing, views and Blade](#routing-views-and-blade)
+11. [Frontend assets (Sass / JS)](#frontend-assets-sass--js)
+12. [Forms and mail](#forms-and-mail)
+13. [Admin panel features](#admin-panel-features)
+14. [Configuration (.env)](#configuration-env)
+15. [Database changes (automatic migrations)](#database-changes-automatic-migrations)
+16. [Deploying to shared hosting](#deploying-to-shared-hosting)
+17. [Security](#security)
+18. [Feedback](#feedback)
 
 ---
 
@@ -112,10 +114,11 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 
 | Area | Features |
 |---|---|
-| Content | Content types with an ACF-style field builder (15 field types, groups, repeaters, conditional show/required), a real table per type, SEO fields, drafts and scheduled publishing, **preview of unsaved changes on the real page**, **duplicate entries**, list columns and date filters |
+| Content | Content types with an ACF-style field builder (16 field types incl. **relation**, groups, repeaters, conditional show/required), a real table per type, SEO fields, drafts, **publish period** (start and optional end), **preview of unsaved changes on the real page**, **duplicate**, **trash with restore**, list columns and date filters |
+| Code | Laravel-style models and queries (`NewsModel::published()->latest()->paginate(10)`), `make:cms-model` / `make:cms-controller` generators, a `Page` controller for view-only pages, a sample with every field kind |
 | Media | Media library (grid, search, drag & drop upload, where-used, delete), "メディアから選択" in every image/file field, CKEditor 5 image upload |
-| Site | Blade frontend you write yourself, contact form (入力 → 確認 → 完了) with mail templates, automatic `sitemap.xml` / `robots.txt`, noindex switch, maintenance mode |
-| Admin | Japanese UI, roles 管理者 / Web管理者, users, branding (logo), activity log, dashboard with charts and disk usage, **backup download** (.sql or .sql + uploads .zip) |
+| Site | Blade frontend you write yourself, contact form (入力 → 確認 → 完了) with **file attachment** and mail templates, automatic `sitemap.xml` / `robots.txt`, noindex switch, maintenance mode |
+| Admin | Japanese UI, roles 管理者 / Web管理者, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
 | Ops | Installer, automatic migrations, hidden admin URL, `deploy.sh` packages for shared hosting |
 
 ## Folder structure
@@ -123,81 +126,131 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 ```
 App/
   Admin/                Admin panel controllers (namespace App\Admin)
-  Controller/           Website controllers (namespace App\Controller)   ← you work here
-  Model/                Models (namespace App\Model)                     ← and here
-  Commands/             spark commands (db:export)
+  Controller/           Website controllers: Home, News (sample), Contact, Page   ← you work here
+  Model/                Models: NewsModel (sample) + EntryModel base             ← and here
+  Commands/             spark commands: make:cms-model, make:cms-controller, db:export
   Config/               CodeIgniter config + Cms.php (SurexCore settings), Sitemap.php
   Database/Migrations/  Schema changes, applied automatically
+  Database/Seeds/       NewsSample (php spark db:seed NewsSample)
   Entities/             Entry (one row of a content type table)
   Filters/              InstallCheck, Maintenance, AdminAuth, DbUpgrade
   Libraries/            Blade, Fields, ContentSchema, Installer, DatabaseExport, ...
 routes/
-  web.php               Public website routes                            ← and here
+  web.php               Public website routes                                    ← and here
   admin.php             Admin routes
 View/
-  frontend/             The website                                       ← and here
-    layout/               default (HTML page + meta), header, footer
+  frontend/             The website                                               ← and here
+    layout/               default (HTML page + SEO/OGP meta), header, footer
     index.blade.php       Top page (the welcome page — replace it)
     news/                 SAMPLE list/detail pages
     contact/              Contact form + mail/ templates
   admin/                Admin panel (AdminLTE 4) and the installer
   system/               404, maintenance, CodeIgniter error pages, pager
 public/
-  assets/frontend/      Website CSS / JS / images                         ← and here
+  assets/frontend/      Website assets                                            ← and here
+    scss/ → css/style.min.css     js/script.js + js/module/ → js/script.min.js
+    css/welcome.css, news.css, contact.css (page styles)   lib/ (jQuery, WOW)
   assets/admin/         Admin panel CSS / JS
   assets/vendor/        Bootstrap, AdminLTE, Bootstrap Icons, CKEditor 5, Chart.js, flatpickr (self-hosted)
   uploads/              Uploaded images/files
-writable/               Cache, logs, sessions, installed.lock
+writable/               Cache, logs, sessions, installed.lock, private uploads (contact attachments)
 deploy.sh               Builds upload packages for shared hosting
 ```
 
 ## The sample: route → controller → model → view
 
-The **News (お知らせ)** sample shows the whole pattern. It works once the content type exists:
+The **お知らせ (News)** sample shows the whole pattern and every common field kind. Create it with:
 
-1. **Admin:** 設定 → コンテンツタイプ → add: name `お知らせ`, slug `news`, fields `headline` (テキスト) and `body` (本文 / CKEditor). Choose `headline` as 「タイトルに使うフィールド」. Add and publish some entries.
-2. **Route** — `routes/web.php`
-   ```php
-   $routes->get('news', [News::class, 'index'], ['as' => 'news']);
-   $routes->get('news/(:segment)', [News::class, 'detail'], ['as' => 'news.detail']);
-   ```
-3. **Model** — `App/Model/NewsModel.php`: one model per content type, like Laravel.
-   ```php
-   class NewsModel extends EntryModel
-   {
-       protected string $contentTypeSlug = 'news';
+```bash
+php spark db:seed NewsSample
+```
 
-       public function latest(int $limit = 3): array
-       {
-           return $this->published()->latestPublished()->findAll($limit);
-       }
-   }
-   ```
-4. **Controller** — `App/Controller/News.php`
-   ```php
-   $news = model(NewsModel::class);
-   return $this->render('frontend.news.index', [
-       'items' => $news->paginated(10),
-       'pager' => $news->pager,
-   ]);
-   ```
-5. **View** — `View/frontend/news/index.blade.php`
-   ```blade
-   @foreach($items as $item)
-       <a href="{{ url_to('news.detail', $item->slug) }}">{{ $item->title }}</a>
-   @endforeach
-   {!! $pager->links() !!}
-   ```
+It creates the content type `news` — fields `news_title` (text), `news_type` (radio), `news_category` (checkbox), `news_pickup` (on/off), `news_summary` (textarea), `news_image` (image), `news_detail` (CKEditor), `news_links` (repeater) and `news_related` (relation) — plus 3 published entries. Running it again on an older sample adds the missing fields.
 
-Copy these four files for your own pages (Store, Works, FAQ, ...). Delete the sample when you no longer need it.
+**Route** — `routes/web.php`
+```php
+$routes->get('news', [News::class, 'index'], ['as' => 'news']);
+$routes->get('news/(:segment)', [News::class, 'detail'], ['as' => 'news.detail']);
+```
 
-**Rule of thumb:** the **model** knows *how* to get data (where, order, published-only); the **controller** decides *which* data a page needs; the **view** decides *how it looks*.
+**Model** — `App/Model/NewsModel.php`: one line, like a Laravel model.
+```php
+class NewsModel extends EntryModel
+{
+    protected string $contentTypeSlug = 'news';
+}
+```
+
+**Controller** — `App/Controller/News.php`
+```php
+public function index(): string
+{
+    $posts = NewsModel::published()->latest()->paginate(10);
+
+    return $this->render('frontend.news.index', compact('posts'));
+}
+
+public function detail(string $slug): string
+{
+    $post = NewsModel::published()->where('slug', $slug)->firstOrFail();
+
+    return $this->render('frontend.news.detail', compact('post'));
+}
+```
+
+**Queries** — static calls start a new query, like Laravel; every CodeIgniter query method chains too:
+
+```php
+NewsModel::published()->latest()->paginate(10);                         // + {!! pagination() !!} in the view
+NewsModel::published()->where('news_type', 'event')->latest()->limit(3)->get();
+NewsModel::published()->whereJsonContains('news_category', 'company')->get();   // checkbox / relation fields
+NewsModel::published()->where('slug', $slug)->firstOrFail();             // 404 when not found
+NewsModel::query()->where('status', 'draft')->oldest()->get();           // all entries incl. drafts
+NewsModel::query()->findOrFail($id);
+```
+
+`published()` = status 公開, publish date reached, publish end date (if any) not reached. Scopes: `published`, `latest`, `oldest`, `whereJsonContains`.
+
+**Views** — `View/frontend/news/` show each field kind:
+
+```blade
+{{ $post->news_title }}                                   {{-- text --}}
+{!! nl2br(esc($post->news_summary)) !!}                   {{-- textarea: escaped, line breaks kept --}}
+{{ $post->label('news_type') }}                           {{-- radio / select: label of the stored value --}}
+@foreach($post->label('news_category') as $c) … @endforeach  {{-- checkbox: list of labels --}}
+@if($post->news_pickup) … @endif                          {{-- on/off: true / false --}}
+<img src="{{ media_url($post->news_image) }}">            {{-- image --}}
+<div class="ck-content">{!! $post->news_detail !!}</div>  {{-- CKEditor: trusted HTML --}}
+@foreach($post->field('news_links', []) as $link)         {{-- repeater: rows as arrays --}}
+    <a href="{{ $link['link_url'] }}">{{ $link['link_label'] }}</a>
+@endforeach
+@foreach($post->relation('news_related') as $related)     {{-- relation: linked entries (published) --}}
+    <a href="{{ url_to('news.detail', $related->slug) }}">{{ $related->title }}</a>
+@endforeach
+```
+
+> Never write `{!! !!}` or `{{ }}` inside a `{{-- comment --}}`: BladeOne reads them before it removes comments.
+
+## Generators
+
+```bash
+php spark make:cms-model Store          # App/Model/StoreModel.php  — content type slug "store"
+php spark make:cms-controller Store     # App/Controller/Store.php  — uses StoreModel, empty index() / detail()
+```
+
+| Option | Example |
+|---|---|
+| `--slug` | `make:cms-model Shop --slug my-shop` (default: from the name, `ProductItem` → `product-item`) |
+| `--model` | `make:cms-controller ProductItem --model Store` |
+| `--force` | overwrite an existing file (otherwise existing files are never touched) |
+
+Then create the content type with that slug in the admin, add the routes, and write the views.
 
 ## Content types and custom fields
 
 An Admin creates content types under **設定 → コンテンツタイプ**. Each gets a sidebar menu item and list/add/edit screens.
 
-**Field types:** テキスト, テキストエリア, 本文 (CKEditor), 数値, メール, URL, 日付, 画像, ファイル, セレクト, ラジオ, チェックボックス, ON/OFF, グループ, リピーター. Groups and repeaters nest up to 3 levels. Fields can be **shown** or **required** only when conditions match (AND within a group, OR between groups), in the form and on the server.
+**Field types:** テキスト, テキストエリア, 本文 (CKEditor), 数値, メール, URL, 日付, 画像, ファイル, セレクト, ラジオ, チェックボックス, ON/OFF, **関連付け (relation)**, グループ, リピーター. Groups and repeaters nest up to 3 levels. Fields can be **shown** or **required** only when conditions match (AND within a group, OR between groups), in the form and on the server.
 
 **Storage — a real table per type:**
 
@@ -232,11 +285,30 @@ content_type_exists('store');
 
 > Use `$item->field('repeater', [])` for repeaters, not `$item->repeater ?? []` (`??` can't see repeater fields).
 
+**Relation (関連付け)** links entries of another content type (or the same one). In the builder choose the target type and 「複数選択できる」 (off: one entry, on: several). Stored as a JSON list of ids:
+
+```blade
+{{ $post->relation('shop')?->title }}                         {{-- single → Entry or null --}}
+@foreach($post->relation('tags') as $tag) … @endforeach       {{-- multiple → list of entries --}}
+```
+```php
+NewsModel::published()->whereJsonContains('shop', 5)->get();  // entries linked to entry 5
+```
+
+**Publish period:** every entry has 公開日時 and an optional 公開終了日時. Empty end = no end; once the end passes, the entry disappears from the site (lists, detail pages, sitemap, relations).
+
 **Preview template** (コンテンツタイプ → プレビュー用テンプレート): empty = `frontend.{slug}.detail`; a template name for detail pages; or a **page URL like `/recruit`** for list pages — the real controller renders the page with the unsaved entry swapped in.
 
 ## Routing, views and Blade
 
 Routes are Laravel-style (`routes/web.php`). Placeholders `(:num)`, `(:segment)`, `(:any)` are passed to the method. Build URLs with `url_to('name', $param)`. Every GET route without placeholders goes into `sitemap.xml` automatically (exclusions in `App/Config/Sitemap.php`).
+
+**Pages without their own controller** (a page that is only a Blade view) need one route line — the URL picks the view:
+
+```php
+$routes->get('about', [Page::class, 'show'], ['as' => 'about']);              // View/frontend/about.blade.php (or about/index.blade.php)
+$routes->get('company/access', [Page::class, 'show'], ['as' => 'company.access']);
+```
 
 Pages extend the layout and fill its sections:
 
@@ -267,6 +339,24 @@ Pages extend the layout and fill its sections:
 | `request()->is('news*')` | `url_is('news*')` |
 | `@include('partials.x')` | `@include('frontend.layout.x')` (full path under `View/`) |
 
+## Frontend assets (Sass / JS)
+
+The layout loads `css/style.min.css` and `js/script.min.js` (plus jQuery and WOW from `lib/`). Build them from the sources with [Prepros](https://prepros.io) (`prepros.config` is included) or from the command line:
+
+```bash
+cd public/assets/frontend
+npx sass scss/style.scss css/style.min.css --style=compressed --no-source-map --load-path=scss
+npx esbuild js/script.js --bundle --minify --format=iife --outfile=js/script.min.js
+```
+
+`js/script.js` imports the modules in `js/module/` and runs them. `base.js` swaps `img.spimg` between `_pc` / `_sp` file names at 768px:
+
+```blade
+<img class="spimg" src="{{ asset('assets/frontend/images/top/mv_pc.jpg') }}" alt="">
+```
+
+Page-only styles go in their own file, pushed from the view: `@push('styles') <link rel="stylesheet" href="{{ asset('assets/frontend/css/news.css') }}"> @endpush`.
+
 ## Forms and mail
 
 `App/Controller/Contact.php` + `View/frontend/contact/` is a complete 入力 → 確認 → 完了 form: CSRF, honeypot, 3 sends per IP per 10 minutes, an admin mail (to `cms.adminEmail`) and an automatic reply.
@@ -292,14 +382,23 @@ Subject: 【{{ $siteName }}】お問い合わせがありました
 本文…
 ```
 
-Send any template with `send_mail_template($to, 'frontend.contact.mail.admin', $data)`, or HTML with `send_mail($to, $subject, $html)`.
+Send any template with `send_mail_template($to, 'frontend.contact.mail.admin', $data)`, or HTML with `send_mail($to, $subject, $html)`. Attach files with the option `['attachments' => [[$path, $fileName]]]`.
+
+**File attachment:** the contact form has an optional 添付ファイル (PDF, images, Office, TXT/CSV, ZIP; 5 MB). The type is checked from the file contents; the file waits in `writable/uploads/contact/` (not public), is sent with the admin mail and then deleted.
+
+**お問い合わせ inbox:** 一般設定 → 「お問い合わせを管理画面に保存する」. When on, every sent form is also saved and a 「お問い合わせ」 menu (with an unread count) appears for both roles: list, detail, attachment download, 未読に戻す, delete. Mail is sent either way. Other forms can save into the same inbox:
+
+```php
+model(InquiryModel::class)->store('recruit', ['お名前' => $name, …], $name, $email, $attachment);
+```
 
 ## Admin panel features
 
 | Menu | Who | What |
 |---|---|---|
 | ダッシュボード | all | stats, charts, recent entries; 管理者 also see activity, system status and **disk usage** |
-| (content types) | all | entries: list, add, edit, **preview**, **複製**, delete |
+| (content types) | all | entries: list, add, edit, **preview**, **複製**, delete → **ゴミ箱** (restore / delete for good / empty) |
+| お問い合わせ | all | saved form submissions (only while 「お問い合わせを保存する」 is on) |
 | メディア | all | media library |
 | ブランディング | all | site logo (`setting('site_logo')`) |
 | 設定 → 一般設定 | 管理者 | site name, date format, maintenance mode, **検索エンジンにインデックスさせない**, test mail |

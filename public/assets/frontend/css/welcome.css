@@ -1,0 +1,64 @@
+/* Welcome page (View/frontend/index.blade.php) — delete together with that page. */
+.sx-welcome {
+    --ink: #14211b;
+    --muted: #5d6b64;
+    --line: #e4ebe7;
+    --bg: #f6f8f7;
+    --brand: #0f3d2e;
+    --brand-2: #1f6b4f;
+    --accent: #b4f105;
+    --radius: 14px;
+    color: var(--ink);
+    line-height: 1.8;
+}
+.sx-welcome *, .sx-welcome *::before, .sx-welcome *::after { box-sizing: border-box; }
+.sx-welcome h1, .sx-welcome h2, .sx-welcome h3 { line-height: 1.35; margin: 0 0 .6em; }
+.sx-welcome a { color: var(--brand-2); }
+.sx-welcome .container { width: min(1120px, 100% - 40px); margin-inline: auto; }
+.sx-welcome .section { padding: 80px 0; }
+.sx-welcome .section--alt { background: var(--bg); }
+.sx-welcome .section-title { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: .3em; }
+.sx-welcome .section-lead { color: var(--muted); margin: 0 0 2.5rem; }
+.sx-welcome code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88em; background: #eef2f0; padding: .1em .4em; border-radius: 6px; }
+
+.sx-welcome .btn { display: inline-flex; align-items: center; gap: .5em; padding: .8em 1.6em; border-radius: 999px;
+    font-weight: 700; text-decoration: none; border: 2px solid transparent; transition: .2s; }
+.sx-welcome .btn-primary { background: var(--accent); color: var(--brand); }
+.sx-welcome .btn-primary:hover { filter: brightness(.95); }
+.sx-welcome .btn-outline { border-color: currentColor; color: #fff; background: transparent; }
+.sx-welcome .btn-outline:hover { background: rgba(255,255,255,.1); }
+
+.sx-welcome .hero { background: radial-gradient(1200px 500px at 85% -10%, rgba(180,241,5,.22), transparent 60%), var(--brand);
+    color: #fff; padding: 110px 0 100px; }
+.sx-welcome .hero__badge { display: inline-block; padding: .25em .9em; border: 1px solid rgba(255,255,255,.3); border-radius: 999px;
+    font-size: .8rem; letter-spacing: .08em; margin-bottom: 1.2rem; }
+.sx-welcome .hero__title { font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 800; letter-spacing: -.02em; color: #fff; }
+.sx-welcome .hero__title span { color: var(--accent); }
+.sx-welcome .hero__lead { font-size: clamp(1rem, 2vw, 1.15rem); color: rgba(255,255,255,.82); max-width: 640px; margin: 0 0 2rem; }
+.sx-welcome .hero__actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.sx-welcome .hero__meta { margin-top: 2.5rem; font-size: .85rem; color: rgba(255,255,255,.6); }
+
+.sx-welcome .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+.sx-welcome .feature { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; }
+.sx-welcome .feature__icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #eef7e6;
+    color: var(--brand-2); font-size: 1.3rem; margin-bottom: .9rem; }
+.sx-welcome .feature h3 { font-size: 1.05rem; margin-bottom: .3em; }
+.sx-welcome .feature p { margin: 0; color: var(--muted); font-size: .92rem; }
+
+.sx-welcome .steps { counter-reset: step; display: grid; gap: 1rem; padding: 0; margin: 0; list-style: none; }
+.sx-welcome .steps li { counter-increment: step; display: grid; grid-template-columns: 44px 1fr; gap: 1rem; align-items: start;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+.sx-welcome .steps li::before { content: counter(step); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--brand); color: var(--accent); font-weight: 800; }
+.sx-welcome .steps h3 { font-size: 1rem; margin-bottom: .2em; }
+.sx-welcome .steps p { margin: 0; color: var(--muted); font-size: .92rem; }
+
+.sx-welcome .about { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+.sx-welcome .about dl { display: grid; grid-template-columns: auto 1fr; gap: .6rem 1.5rem; margin: 0; }
+.sx-welcome .about dt { color: var(--muted); }
+.sx-welcome .about dd { margin: 0; font-weight: 600; }
+
+@media (max-width: 767px) {
+    .sx-welcome .section { padding: 56px 0; }
+    .sx-welcome .about { grid-template-columns: 1fr; gap: 2rem; }
+}

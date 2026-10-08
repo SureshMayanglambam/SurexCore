@@ -34,7 +34,7 @@ class Dashboard extends AdminController
         // Each content type has its own table: count per table, then merge.
         foreach (model(ContentTypeModel::class)->allBySlug() as $slug => $type) {
             $stats = [
-                'published' => EntryModel::for($type)->where('status', 'published')->where('published_at <=', $now)->countAllResults(),
+                'published' => EntryModel::for($type)->published()->countAllResults(),
                 'scheduled' => EntryModel::for($type)->where('status', 'published')->where('published_at >', $now)->countAllResults(),
                 'draft'     => EntryModel::for($type)->where('status', 'draft')->countAllResults(),
                 'thisMonth' => EntryModel::for($type)->where('status', 'published')->where('published_at >=', $monthStart)->where('published_at <=', $now)->countAllResults(),

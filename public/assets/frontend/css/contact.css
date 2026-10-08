@@ -1,0 +1,29 @@
+/* Contact form (View/frontend/contact/) */
+.sx-contact { --line: #e4ebe7; --muted: #5d6b64; --brand: #0f3d2e; line-height: 1.8; }
+.sx-contact .page-header { background: #f6f8f7; padding: 48px 0; border-bottom: 1px solid var(--line); }
+.sx-contact .page-header h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0; }
+.sx-contact .page-header p { margin: .3rem 0 0; color: var(--muted); }
+.sx-contact .section { padding: 56px 0 80px; }
+.sx-contact .form { max-width: 720px; }
+.sx-contact .form-row { margin-bottom: 1.5rem; }
+.sx-contact .form-row > label { display: block; font-weight: 700; margin-bottom: .4rem; }
+.sx-contact .req { display: inline-block; margin-left: .5rem; padding: 0 .5em; font-size: .75rem; background: var(--brand); color: #fff; border-radius: 4px; }
+.sx-contact .form-note { font-weight: 400; font-size: .8rem; color: var(--muted); }
+.sx-contact input[type=text], .sx-contact input[type=email], .sx-contact input[type=tel], .sx-contact textarea {
+    width: 100%; padding: .75rem .9rem; border: 1px solid #cfd8d3; border-radius: 10px; font: inherit; }
+.sx-contact textarea { min-height: 180px; }
+.sx-contact input[type=file] { font: inherit; }
+.sx-contact .form-attached { background: #f6f8f7; padding: .5rem .9rem; border-radius: 8px; margin: 0 0 .5rem; font-size: .9rem; }
+.sx-contact .form-attached label { margin-left: 1rem; font-weight: 400; }
+.sx-contact .is-invalid { border-color: #d33 !important; }
+.sx-contact .form-error { display: block; color: #d33; font-size: .875rem; margin-top: .3rem; }
+.sx-contact .confirm-list { display: grid; grid-template-columns: 200px 1fr; margin: 0 0 2rem; border-top: 1px solid var(--line); }
+.sx-contact .confirm-list dt, .sx-contact .confirm-list dd { margin: 0; padding: 1rem .5rem; border-bottom: 1px solid var(--line); }
+.sx-contact .confirm-list dt { font-weight: 700; }
+.sx-contact .confirm-list dd { white-space: pre-wrap; }
+.sx-contact .form-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.sx-contact .btn { display: inline-flex; align-items: center; padding: .8em 1.8em; border-radius: 999px; font: inherit; font-weight: 700;
+    cursor: pointer; border: 2px solid var(--brand); text-decoration: none; }
+.sx-contact .btn-primary { background: var(--brand); color: #fff; }
+.sx-contact .btn-outline { background: #fff; color: var(--brand); }
+@media (max-width: 767px) { .sx-contact .confirm-list { grid-template-columns: 1fr; } .sx-contact .confirm-list dt { border-bottom: 0; padding-bottom: 0; } }

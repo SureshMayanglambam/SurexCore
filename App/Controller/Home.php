@@ -15,7 +15,6 @@ class Home extends FrontController
     {
         return $this->render('frontend.index', [
             'cms' => [
-                'name'      => Cms::NAME,
                 'version'   => config('Cms')->version,
                 'developer' => Cms::DEVELOPER,
                 'framework' => 'CodeIgniter ' . CodeIgniter::CI_VERSION,

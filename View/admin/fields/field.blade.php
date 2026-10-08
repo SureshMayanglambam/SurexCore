@@ -80,6 +80,31 @@
             </div>
             @break
 
+        @case('relation')
+            @php $options = service('fields')->relationOptions($field['related_type']); $chosen = array_map('strval', (array) $value); @endphp
+            @if(! $options)
+                <div class="form-text">関連付けできる投稿がありません（コンテンツタイプ「{{ $field['related_type'] }}」に投稿を追加してください）。</div>
+            @elseif($field['multiple'])
+                <div id="{{ $id }}" class="fld-relation border rounded p-2">
+                    <input type="hidden" name="{{ $name }}[]" value="">
+                    @foreach($options as $optionId => $optionTitle)
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="{{ $name }}[]" id="{{ $id }}_{{ $optionId }}"
+                                   value="{{ $optionId }}" @checked(in_array((string) $optionId, $chosen, true))>
+                            <label class="form-check-label" for="{{ $id }}_{{ $optionId }}">{{ $optionTitle }}</label>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <select id="{{ $id }}" name="{{ $name }}" class="form-select">
+                    <option value="">— 選択してください —</option>
+                    @foreach($options as $optionId => $optionTitle)
+                        <option value="{{ $optionId }}" @selected(in_array((string) $optionId, $chosen, true))>{{ $optionTitle }}</option>
+                    @endforeach
+                </select>
+            @endif
+            @break
+
         @case('toggle')
             <input type="hidden" name="{{ $name }}" value="0">
             <div class="form-check form-switch">

@@ -16,6 +16,7 @@ use App\Admin\Branding;
 use App\Admin\ContentTypes;
 use App\Admin\Dashboard;
 use App\Admin\Entries;
+use App\Admin\Inquiries;
 use App\Admin\Media;
 use App\Admin\Profile;
 use App\Admin\Settings;
@@ -41,6 +42,13 @@ $routes->group(config('Cms')->adminPath, ['filter' => 'dbupgrade'], static funct
         // Image/file uploads for custom fields and CKEditor
         $routes->post('upload', [Media::class, 'upload'], ['as' => 'admin.upload']);
 
+        // お問い合わせ: saved form submissions (only while 一般設定 → お問い合わせを保存する is on)
+        $routes->get('inquiries', [Inquiries::class, 'index'], ['as' => 'admin.inquiries']);
+        $routes->get('inquiries/(:num)', [Inquiries::class, 'show'], ['as' => 'admin.inquiries.show']);
+        $routes->post('inquiries/(:num)/unread', [Inquiries::class, 'unread'], ['as' => 'admin.inquiries.unread']);
+        $routes->get('inquiries/(:num)/attachment', [Inquiries::class, 'attachment'], ['as' => 'admin.inquiries.attachment']);
+        $routes->delete('inquiries/(:num)', [Inquiries::class, 'delete'], ['as' => 'admin.inquiries.delete']);
+
         // メディア: the media library (and its picker in entry forms)
         $routes->get('media', [Media::class, 'index'], ['as' => 'admin.media']);
         $routes->get('media/list', [Media::class, 'list'], ['as' => 'admin.media.list']);
@@ -55,6 +63,10 @@ $routes->group(config('Cms')->adminPath, ['filter' => 'dbupgrade'], static funct
         $routes->put('content/(:segment)/(:num)', [Entries::class, 'update'], ['as' => 'admin.entries.update']);
         $routes->delete('content/(:segment)/(:num)', [Entries::class, 'delete'], ['as' => 'admin.entries.delete']);
         $routes->post('content/(:segment)/(:num)/duplicate', [Entries::class, 'duplicate'], ['as' => 'admin.entries.duplicate']);
+        // ゴミ箱: restore / delete for good / empty
+        $routes->post('content/(:segment)/(:num)/restore', [Entries::class, 'restore'], ['as' => 'admin.entries.restore']);
+        $routes->delete('content/(:segment)/(:num)/purge', [Entries::class, 'purge'], ['as' => 'admin.entries.purge']);
+        $routes->delete('content/(:segment)/trash', [Entries::class, 'emptyTrash'], ['as' => 'admin.entries.emptyTrash']);
         // Preview of the unsaved form in the frontend template (POST, or PUT from the edit form)
         $routes->match(['POST', 'PUT'], 'content/(:segment)/preview', [Entries::class, 'preview'], ['as' => 'admin.entries.preview']);
         $routes->match(['POST', 'PUT'], 'content/(:segment)/(:num)/preview', [Entries::class, 'preview'], ['as' => 'admin.entries.preview.edit']);

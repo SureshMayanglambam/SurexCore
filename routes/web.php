@@ -7,9 +7,11 @@
  *   $routes->get('store/(:segment)', [Store::class, 'show'], ['as' => 'store.show']);
  *
  * Placeholders: (:num) (:segment) (:any) (:alpha) (:alphanum) — passed to the method in order.
- * Build URLs in Blade with url_to('route.name', ...$params). List all routes: php spark routes
+ * Build URLs in Blade with url_to('route.name', ...$params).
  *
- * Every GET route without placeholders is added to sitemap.xml automatically (App/Config/Sitemap.php).
+ * Content from the admin panel (in controllers):
+ *   entries('store')->paginate(10)    published entries of a content type
+ *   entry('store', $slug)             one entry, or null
  *
  * @var CodeIgniter\Router\RouteCollection $routes
  */
@@ -19,6 +21,7 @@ use App\Controller\Errors;
 use App\Controller\Home;
 use App\Controller\Install;
 use App\Controller\News;
+use App\Controller\Page;
 use App\Controller\Seo;
 
 $routes->set404Override(Errors::class . '::notFound');
@@ -31,10 +34,12 @@ $routes->get('robots.txt', [Seo::class, 'robots'], ['as' => 'robots']);
 $routes->get('install', [Install::class, 'index'], ['as' => 'install']);
 $routes->post('install', [Install::class, 'store']);
 
-// Top page (the SurexCore welcome page — replace View/frontend/index.blade.php)
 $routes->get('/', [Home::class, 'index'], ['as' => 'home']);
 
-// SAMPLE: お知らせ — list + detail (App/Controller/News.php, App/Model/NewsModel.php, View/frontend/news/)
+// Pages without their own controller: View/frontend/{url}.blade.php
+// $routes->get('about', [Page::class, 'show'], ['as' => 'about']);
+
+// お知らせ
 $routes->get('news', [News::class, 'index'], ['as' => 'news']);
 $routes->get('news/(:segment)', [News::class, 'detail'], ['as' => 'news.detail']);
 

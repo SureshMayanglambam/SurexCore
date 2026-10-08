@@ -18,6 +18,7 @@
     const OPERATORS = JSON.parse(root.dataset.operators);  // operator => label
     // Built-in columns of the type table / of repeater row tables: field names can't use them.
     const RESERVED = JSON.parse(root.dataset.reserved);    // { entry: [...], row: [...] }
+    const CONTENT_TYPES = JSON.parse(root.dataset.contentTypes || '{}');   // slug => name (for relation fields)
 
     const form = root.closest('form');
     const output = form.querySelector('[name="fields_json"]');
@@ -35,6 +36,8 @@
         field.conditions ??= [];
         field.required_if ??= [];
         field.show_in_list ??= false;
+        field.related_type ??= '';
+        field.multiple ??= false;
         (field.sub_fields ??= []).forEach(prepare);
         return field;
     };
@@ -287,7 +290,17 @@
                     onchange: e => field.default = e.target.checked }),
                 h('label', { class: 'form-check-label', for: field.key + '_def' }, '初期状態でオン')));
         }
-        if (options.length) main.push(section(...options));
+        if (t === 'relation') {
+            const typeSelect = h('select', { class: 'form-select', onchange: e => { field.related_type = e.target.value; } },
+                h('option', { value: '' }, '— コンテンツタイプを選択 —'),
+                ...Object.entries(CONTENT_TYPES).map(([slug, name]) =>
+                    h('option', { value: slug, selected: field.related_type === slug }, `${name}（${slug}）`)));
+            options.push(h('div', { class: 'row g-3 align-items-end' + (options.length ? ' mt-0' : '') },
+                col(6, labelled('関連付けるコンテンツタイプ', typeSelect, 'このコンテンツタイプの投稿から選択できます')),
+                col(6, h('div', { class: 'pb-2' }, toggle(field.key + '_multiple', '複数選択できる', 'オフ：1件だけ選択（セレクト）／オン：複数選択（チェックボックス）',
+                    !!field.multiple, e => { field.multiple = e.target.checked; })))
+            ));
+        }
         if (t === 'repeater') {
             options.push(h('div', { class: 'row g-3' + (options.length ? ' mt-0' : '') },
                 col(4, labelled('最小行数', input(field, 'min_rows', { type: 'number', min: 0, placeholder: '0' }))),
@@ -295,6 +308,7 @@
                 col(4, labelled('ボタンのラベル', input(field, 'button_label', { placeholder: '行を追加' })))
             ));
         }
+        if (options.length) main.push(section(...options));
         if (CONTAINERS.includes(t)) {
             main.push(h('div', { class: 'fb-sub' },
                 h('div', { class: 'small fw-semibold text-secondary mb-3' }, icon(t === 'group' ? 'collection' : 'list-ol'), ' ',
@@ -319,7 +333,7 @@
             case 'number': return ['==', '!=', '>', '<', 'empty', 'not_empty'];
             case 'toggle': return ['=='];
             case 'select': case 'radio': case 'checkbox': return ['==', '!=', 'empty', 'not_empty'];
-            case 'image': case 'file': case 'editor': return ['not_empty', 'empty'];
+            case 'image': case 'file': case 'editor': case 'relation': return ['not_empty', 'empty'];
             case undefined: return ['=='];
             default: return ['==', '!=', 'contains', 'empty', 'not_empty'];
         }

@@ -23,6 +23,7 @@ class Settings extends AdminController
         'activity_retention_days' => 90,
         'maintenance_mode'        => '0',
         'search_noindex'          => '0',
+        'store_inquiries'         => '0',
     ];
 
     public function index(): string
@@ -60,11 +61,13 @@ class Settings extends AdminController
             'activity_retention_days' => ['label' => '操作ログの保存期間', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[3650]'],
             'maintenance_mode'        => ['label' => 'メンテナンスモード', 'rules' => 'permit_empty|in_list[0,1]'],
             'search_noindex'          => ['label' => '検索エンジンにインデックスさせない', 'rules' => 'permit_empty|in_list[0,1]'],
+            'store_inquiries'         => ['label' => 'お問い合わせを保存する', 'rules' => 'permit_empty|in_list[0,1]'],
         ];
 
         $input                     = $this->request->getPost(array_keys($rules));
         $input['maintenance_mode'] = $input['maintenance_mode'] === '1' ? '1' : '0';
         $input['search_noindex']   = ($input['search_noindex'] ?? '') === '1' ? '1' : '0';
+        $input['store_inquiries']  = ($input['store_inquiries'] ?? '') === '1' ? '1' : '0';
 
         if (! $this->validateData($input, $rules)) {
             return $this->backWithErrors($this->validator->getErrors());

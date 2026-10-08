@@ -20,14 +20,13 @@ class Cms extends BaseConfig
     /**
      * CMS version shown in the admin footer.
      */
-    public string $version = '0.1.0';
+    public string $version = '0.1.1';
 
     /**
-     * Product name and developer credit (welcome page, "Powered by", admin footer). Constants on purpose:
-     * they can't be changed from .env or the admin panel (config properties can), only here in the code.
+     * Product name and developer credit (welcome page). Constants: only changeable here in the code.
      */
     public const NAME      = 'SurexCore';
-    public const DEVELOPER = 'Suresh Mayanglambam';
+    public const DEVELOPER = 'Wonderful Door';
 
     /**
      * Name of the CMS in the admin panel and default sender name for email (.env: cms.appName).

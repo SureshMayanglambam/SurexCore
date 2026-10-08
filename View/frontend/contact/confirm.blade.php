@@ -3,7 +3,12 @@
 @section('title', 'お問い合わせ（確認） | ' . $site->name)
 @section('robots', 'noindex, nofollow')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/frontend/css/contact.css') }}">
+@endpush
+
 @section('content')
+<div class="sx-contact">
 
     <section class="page-header">
         <div class="container">
@@ -26,6 +31,7 @@
                     <dt>メールアドレス</dt><dd>{{ $data['email'] }}</dd>
                     <dt>電話番号</dt><dd>{{ $data['tel'] }}</dd>
                     <dt>お問い合わせ内容</dt><dd>{{ $data['message'] }}</dd>
+                    <dt>添付ファイル</dt><dd>{{ $attachment ? $attachment['name'] . '（' . ceil($attachment['size'] / 1024) . ' KB）' : 'なし' }}</dd>
                 </dl>
 
                 <div class="form-actions">
@@ -37,4 +43,5 @@
         </div>
     </section>
 
+</div>
 @endsection

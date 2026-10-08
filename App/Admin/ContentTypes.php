@@ -73,6 +73,8 @@ class ContentTypes extends AdminController
             'fieldTypes' => Fields::TYPES,
             'operators'  => Fields::OPERATORS,
             'reserved'   => ['entry' => ContentSchema::BASE_COLUMNS, 'row' => ContentSchema::ROW_COLUMNS],
+            // Targets for relation fields: slug => name
+            'contentTypeOptions' => array_map(static fn ($t) => $t->name, model(ContentTypeModel::class)->allBySlug()),
         ]);
     }
 

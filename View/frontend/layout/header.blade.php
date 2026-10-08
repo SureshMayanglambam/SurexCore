@@ -1,21 +1,22 @@
-<header class="site-header">
-    <div class="container site-header__inner">
-        <a class="site-logo" href="{{ url('/') }}">
-            {{-- No database before installation (e.g. a 404 page then) --}}
-            @if(service('installer')->isInstalled() && setting('site_logo'))
-                <img src="{{ media_url(setting('site_logo')) }}" alt="">
-            @endif
-            <span>{{ $site->name }}</span>
-        </a>
+<header class="header">
 
-        <button class="nav-toggle" type="button" aria-label="メニュー" aria-expanded="false" aria-controls="site-nav">
-            <span></span><span></span><span></span>
-        </button>
+    <a class="header__home block" href="{{ url('/') }}">{{ $site->name }}</a>
 
-        <nav class="site-nav" id="site-nav">
-            <a href="{{ url('/') }}" @class(['is-current' => url_is('/')])>Home</a>
-            <a href="{{ url_to('news') }}" @class(['is-current' => url_is('news*')])>News</a>
-            <a href="{{ url_to('contact') }}" @class(['is-current' => url_is('contact*')])>Contact</a>
-        </nav>
+    <nav class="header__nav">
+        <ul class="header__menu menu">
+            <li class="menu__item">
+                <a class="menu__link" href="{{ url('/') }}">ホーム</a>
+            </li>
+            <li class="menu__item">
+                <a class="menu__link" href="{{ url_to('news') }}">お知らせ</a>
+            </li>
+            <li class="menu__item">
+                <a class="menu__link" href="{{ url_to('contact') }}">お問い合わせ</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="hamburger">
+        <span></span>
     </div>
 </header>

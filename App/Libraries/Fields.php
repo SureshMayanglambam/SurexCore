@@ -34,6 +34,7 @@ class Fields
         'radio'    => ['ラジオボタン', '選択'],
         'checkbox' => ['チェックボックス', '選択'],
         'toggle'   => ['オン／オフ', '選択'],
+        'relation' => ['関連付け（他のコンテンツ）', '選択'],
         'group'    => ['グループ', 'レイアウト'],
         'repeater' => ['リピーター', 'レイアウト'],
     ];
@@ -151,6 +152,15 @@ class Fields
 
                 case 'toggle':
                     $def['default'] = ! empty($field['default']);
+                    break;
+
+                case 'relation':
+                    // Entries of another content type (by slug); one or several.
+                    $def['related_type'] = preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', (string) ($field['related_type'] ?? '')) ? $field['related_type'] : '';
+                    $def['multiple']     = ! empty($field['multiple']);
+                    if ($def['related_type'] === '') {
+                        $errors[] = "{$where}：関連付けるコンテンツタイプを選択してください。";
+                    }
                     break;
 
                 case 'group':
@@ -389,7 +399,7 @@ class Fields
     private function comparable(array $field, mixed $raw): string|array|null
     {
         return match ($field['type']) {
-            'checkbox' => array_values(array_map('strval', array_filter((array) $raw, 'is_scalar'))),
+            'checkbox', 'relation' => array_values(array_map('strval', array_filter((array) $raw, static fn ($v) => is_scalar($v) && $v !== ''))),
             'toggle'   => in_array($raw, ['1', 1, true, 'on'], true) ? '1' : '0',
             default    => is_scalar($raw) ? trim((string) $raw) : '',
         };
@@ -416,7 +426,7 @@ class Fields
     private function emptyValue(array $field): mixed
     {
         return match ($field['type']) {
-            'checkbox', 'repeater' => [],
+            'checkbox', 'repeater', 'relation' => [],
             'group'                => array_map(fn ($sub) => $this->emptyValue($sub), array_column($field['sub_fields'], null, 'name')),
             'toggle'               => false,
             'number'               => null,
@@ -510,6 +520,19 @@ class Fields
             case 'toggle':
                 return in_array($raw, ['1', 1, true, 'on'], true);
 
+            case 'relation':
+                // Ids of existing entries of the related type, as strings (stored as a JSON list).
+                $ids = array_values(array_unique(array_filter(array_map('intval', array_filter((array) $raw, 'is_scalar')), static fn ($id) => $id > 0)));
+                $ids = array_values(array_intersect(array_map('strval', $ids), array_map('strval', array_keys($this->relationOptions($field['related_type'])))));
+                if (! $field['multiple']) {
+                    $ids = array_slice($ids, 0, 1);
+                }
+                if ($ids === [] && $required) {
+                    $errors[] = "{$where}を選択してください。";
+                }
+
+                return $ids;
+
             case 'image':
             case 'file':
                 $value = is_string($raw) ? trim($raw) : '';
@@ -565,7 +588,7 @@ class Fields
     {
         return match ($field['type']) {
             'group'    => $this->defaults($field['sub_fields']),
-            'repeater' => [],
+            'repeater', 'relation' => [],
             'checkbox' => ($field['default'] ?? '') !== '' ? [$field['default']] : [],
             default    => $field['default'] ?? null,
         };
@@ -580,6 +603,24 @@ class Fields
         }
 
         return $out;
+    }
+
+    /**
+     * Entries a relation field can link to: id => title (drafts included, trashed entries not).
+     *
+     * @return array<int, string>
+     */
+    public function relationOptions(string $slug): array
+    {
+        static $cache = [];
+
+        if (! isset($cache[$slug])) {
+            $cache[$slug] = $slug !== '' && content_type_exists($slug)
+                ? array_column(\App\Model\EntryModel::for($slug)->asArray()->select('id, title')->orderBy('title')->findAll(), 'title', 'id')
+                : [];
+        }
+
+        return $cache[$slug];
     }
 
     private function numberOrNull(mixed $value): int|float|null

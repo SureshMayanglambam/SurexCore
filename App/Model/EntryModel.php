@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Entities\Entry;
 use App\Libraries\ContentSchema;
+use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Database\ConnectionInterface;
 use CodeIgniter\Model;
 use CodeIgniter\Validation\ValidationInterface;
@@ -24,7 +25,7 @@ class EntryModel extends Model
     protected $useSoftDeletes = true;
     protected $afterFind      = ['attachType'];
 
-    private const BASE_FIELDS = ['title', 'slug', 'status', 'author_id', 'meta_title', 'meta_description', 'published_at'];
+    private const BASE_FIELDS = ['title', 'slug', 'status', 'author_id', 'meta_title', 'meta_description', 'published_at', 'published_until'];
 
     /**
      * Unsaved entries being previewed, per content type slug (Admin\Entries::preview()).
@@ -99,14 +100,19 @@ class EntryModel extends Model
     }
 
     /**
-     * Only content visitors may see: published and not scheduled in the future.
+     * Only content visitors may see: status 公開, the publish date reached, and the end date
+     * (公開終了日時) not reached yet — an empty end date means no end.
      */
-    public function published(): static
+    protected function scopePublished(): void
     {
-        $this->where($this->table . '.status', 'published')
-            ->where($this->table . '.published_at <=', date('Y-m-d H:i:s'));
+        $now = date('Y-m-d H:i:s');
 
-        return $this;
+        $this->where($this->table . '.status', 'published')
+            ->where($this->table . '.published_at <=', $now)
+            ->groupStart()
+                ->where($this->table . '.published_until', null)
+                ->orWhere($this->table . '.published_until >', $now)
+            ->groupEnd();
     }
 
     public function findPublished(string $slug): ?Entry
@@ -122,6 +128,116 @@ class EntryModel extends Model
         $this->orderBy($this->table . '.published_at', 'DESC');
 
         return $this;
+    }
+
+    // ------------------------------------------------------------------
+    // Laravel-style queries. Static calls start a new query, like Laravel models:
+    //
+    //   NewsModel::published()->latest()->paginate(10);
+    //   NewsModel::published()->where('slug', $slug)->firstOrFail();
+    //   NewsModel::published()->where('news_type', 'event')->latest()->limit(3)->get();
+    //   NewsModel::published()->whereJsonContains('news_category', 'company')->get();
+    //
+    // Scopes (published, latest, oldest, whereJsonContains) are methods named scopeXxx;
+    // every CodeIgniter query method works too: where, orWhere, whereIn, like, orderBy, first, ...
+    // ------------------------------------------------------------------
+
+    /**
+     * NewsModel::published() → (new NewsModel())->published()
+     */
+    public static function __callStatic(string $name, array $params): mixed
+    {
+        return (new static())->{$name}(...$params);
+    }
+
+    /**
+     * Scopes first, then CodeIgniter's query builder.
+     */
+    public function __call(string $name, array $params)
+    {
+        $scope = 'scope' . ucfirst($name);
+        if (method_exists($this, $scope)) {
+            $this->{$scope}(...$params);
+
+            return $this;
+        }
+
+        return parent::__call($name, $params);
+    }
+
+    /**
+     * A new, empty query: NewsModel::query()->where(...)->get()
+     */
+    public static function query(): static
+    {
+        return new static();
+    }
+
+    /** Newest first (default: by publish date). */
+    protected function scopeLatest(string $column = 'published_at'): void
+    {
+        $this->orderBy($this->table . '.' . $column, 'DESC');
+    }
+
+    /** Oldest first (default: by publish date). */
+    protected function scopeOldest(string $column = 'published_at'): void
+    {
+        $this->orderBy($this->table . '.' . $column, 'ASC');
+    }
+
+    /** Checkbox fields hold a JSON list: entries where this value is checked. */
+    protected function scopeWhereJsonContains(string $column, string|int $value): void
+    {
+        $this->like($this->table . '.' . $column, '"' . $value . '"');
+    }
+
+    /** limit() / offset() for get() — findAll() would replace a limit set on the builder. */
+    private ?int $queryLimit = null;
+    private int $queryOffset = 0;
+
+    public function limit(?int $limit = null, ?int $offset = 0): static
+    {
+        $this->queryLimit  = $limit;
+        $this->queryOffset = (int) $offset;
+
+        return $this;
+    }
+
+    public function offset(int $offset): static
+    {
+        $this->queryOffset = $offset;
+
+        return $this;
+    }
+
+    /**
+     * Run the query: the matching entries, with limit() / offset() if set.
+     *
+     * @return list<Entry>
+     */
+    public function get(): array
+    {
+        [$limit, $offset]  = [$this->queryLimit ?? 0, $this->queryOffset];
+        $this->queryLimit  = null;
+        $this->queryOffset = 0;
+
+        return $this->findAll($limit, $offset);
+    }
+
+    /**
+     * The first match, or the 404 page.
+     */
+    public function firstOrFail(): Entry
+    {
+        return $this->first() ?? throw PageNotFoundException::forPageNotFound();
+    }
+
+    /**
+     * An entry by id, or the 404 page.
+     */
+    public function findOrFail(int $id): Entry
+    {
+        return $this->find($id) ?? throw PageNotFoundException::forPageNotFound();
     }
 
     public function withAuthor(): static

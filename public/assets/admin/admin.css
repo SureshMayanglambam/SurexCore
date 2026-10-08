@@ -72,3 +72,6 @@ a.fld-upload-preview { max-width: 60%; }
 .media-meta { display: grid; grid-template-columns: auto 1fr; gap: .4rem 1rem; font-size: .875rem; }
 .media-meta dt { color: var(--muted); font-weight: 500; }
 .media-meta dd { margin: 0; word-break: break-all; }
+
+/* Relation field (multiple): scrollable list of entries */
+.fld-relation { max-height: 220px; overflow-y: auto; }

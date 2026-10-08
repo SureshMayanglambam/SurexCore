@@ -77,6 +77,20 @@
                     </div>
                 </div>
 
+                <div class="card card-primary card-outline mb-4">
+                    <div class="card-header"><h3 class="card-title"><i class="bi bi-inbox me-1"></i> お問い合わせ</h3></div>
+                    <div class="card-body">
+                        <input type="hidden" name="store_inquiries" value="0">
+                        <div class="form-check form-switch">
+                            <input id="store_inquiries" type="checkbox" name="store_inquiries" value="1" class="form-check-input"
+                                   @checked(old('store_inquiries', $values['store_inquiries']) === '1')>
+                            <label class="form-check-label" for="store_inquiries">お問い合わせを管理画面に保存する</label>
+                            <i class="bi bi-question-circle tip" tabindex="0" data-bs-toggle="tooltip"
+                               title="オンにすると、フォームの送信内容（添付ファイルを含む）を保存し、メニューに「お問い合わせ」を表示します。メールはオン・オフに関係なく送信されます"></i>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card card-info card-outline mb-4">
                     <div class="card-header"><h3 class="card-title"><i class="bi bi-envelope me-1"></i> メール（SMTP）</h3></div>
                     <div class="card-body">

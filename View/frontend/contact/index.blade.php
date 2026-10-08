@@ -7,7 +7,12 @@
 @section('title', 'お問い合わせ | ' . $site->name)
 @section('description', $site->name . 'へのお問い合わせはこちらのフォームからお送りください。')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/frontend/css/contact.css') }}">
+@endpush
+
 @section('content')
+<div class="sx-contact">
 
 @php $errors = session('errors') ?? []; @endphp
 
@@ -20,7 +25,7 @@
 
     <section class="section">
         <div class="container">
-            <form class="form" method="post" action="{{ url_to('contact.confirm') }}" novalidate>
+            <form class="form" method="post" action="{{ url_to('contact.confirm') }}" enctype="multipart/form-data" novalidate>
                 @csrf
 
                 <div class="form-row">
@@ -53,6 +58,20 @@
                     @error('message')<span class="form-error">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- File: optional, sent with the admin mail (types and size: Contact::ATTACHMENT_*) --}}
+                <div class="form-row">
+                    <label for="attachment">添付ファイル <span class="form-note">（任意・5MBまで：PDF / 画像 / Word / Excel / PowerPoint / ZIP）</span></label>
+                    @if($attachment)
+                        <p class="form-attached">
+                            添付済み：{{ $attachment['name'] }}
+                            <label><input type="checkbox" name="remove_attachment" value="1"> 削除する</label>
+                        </p>
+                    @endif
+                    <input id="attachment" type="file" name="attachment" @class(['is-invalid' => isset($errors['attachment'])])
+                           accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip">
+                    @error('attachment')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+
                 <div class="form-row">
                     <label>
                         <input type="checkbox" name="privacy" value="1" @checked(old('privacy'))>
@@ -68,4 +87,5 @@
         </div>
     </section>
 
+</div>
 @endsection

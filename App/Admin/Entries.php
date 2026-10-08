@@ -22,6 +22,7 @@ class Entries extends AdminController
         'slug'             => ['label' => 'スラッグ', 'rules' => 'permit_empty|max_length[191]'],
         'status'           => ['label' => 'ステータス', 'rules' => 'required|in_list[draft,published]'],
         'published_at'     => ['label' => '公開日時', 'rules' => 'permit_empty|valid_date[Y-m-d\TH:i]'],
+        'published_until'  => ['label' => '公開終了日時', 'rules' => 'permit_empty|valid_date[Y-m-d\TH:i]'],
         'meta_title'       => ['label' => 'メタタイトル', 'rules' => 'permit_empty|max_length[255]'],
         'meta_description' => ['label' => 'メタディスクリプション', 'rules' => 'permit_empty|max_length[500]'],
     ];
@@ -36,7 +37,12 @@ class Entries extends AdminController
         $from   = $this->validDate($this->request->getGet('from'));
         $to     = $this->validDate($this->request->getGet('to'));
 
+        $trash = $this->request->getGet('trash') === '1';
+
         $model->withAuthor();
+        if ($trash) {
+            $model->onlyDeleted();
+        }
 
         if (in_array($status, ['draft', 'published'], true)) {
             $model->where("{$table}.status", $status);
@@ -61,6 +67,8 @@ class Entries extends AdminController
             'from'       => $from,
             'to'         => $to,
             'filtered'   => $status || $search !== '' || $from || $to,
+            'trash'      => $trash,
+            'trashCount' => EntryModel::for($type)->onlyDeleted()->countAllResults(),
             // Fields switched to "Show in list" in the content type's field builder
             'listFields' => array_values(array_filter($type->fields, static fn ($f) => ! empty($f['show_in_list']))),
         ]);
@@ -151,9 +159,54 @@ class Entries extends AdminController
         $item = $this->findEntry($type, $id);
 
         EntryModel::for($type)->delete($item->id);
-        log_activity('entry.deleted', "{$type->singular}「{$item->title}」を削除しました", $type->slug, $item->id);
+        log_activity('entry.deleted', "{$type->singular}「{$item->title}」をゴミ箱に移動しました", $type->slug, $item->id);
 
-        return redirect()->route('admin.entries', [$type->slug])->with('success', "「{$item->title}」を削除しました。");
+        return redirect()->route('admin.entries', [$type->slug])->with('success', "「{$item->title}」をゴミ箱に移動しました。");
+    }
+
+    /**
+     * ゴミ箱 → 復元
+     */
+    public function restore(string $typeSlug, int $id): RedirectResponse
+    {
+        $type = $this->findType($typeSlug);
+        $item = $this->findTrashed($type, $id);
+
+        $model = EntryModel::for($type);
+        $model->builder()->where('id', $item->id)->update(['deleted_at' => null]);
+        log_activity('entry.restored', "{$type->singular}「{$item->title}」をゴミ箱から復元しました", $type->slug, $item->id);
+
+        return redirect()->to(url_to('admin.entries', $type->slug) . '?trash=1')->with('success', "「{$item->title}」を復元しました。");
+    }
+
+    /**
+     * ゴミ箱 → 完全に削除 (repeater rows go with it: ON DELETE CASCADE)
+     */
+    public function purge(string $typeSlug, int $id): RedirectResponse
+    {
+        $type = $this->findType($typeSlug);
+        $item = $this->findTrashed($type, $id);
+
+        EntryModel::for($type)->delete($item->id, true);
+        log_activity('entry.purged', "{$type->singular}「{$item->title}」を完全に削除しました", $type->slug, $item->id);
+
+        return redirect()->to(url_to('admin.entries', $type->slug) . '?trash=1')->with('success', "「{$item->title}」を完全に削除しました。");
+    }
+
+    /**
+     * ゴミ箱を空にする
+     */
+    public function emptyTrash(string $typeSlug): RedirectResponse
+    {
+        $type  = $this->findType($typeSlug);
+        $count = EntryModel::for($type)->onlyDeleted()->countAllResults();
+
+        if ($count > 0) {
+            EntryModel::for($type)->purgeDeleted();
+            log_activity('entry.purged', "{$type->name}のゴミ箱を空にしました（{$count}件）", $type->slug);
+        }
+
+        return redirect()->route('admin.entries', [$type->slug])->with('success', "ゴミ箱を空にしました（{$count}件）。");
     }
 
     /**
@@ -178,6 +231,7 @@ class Entries extends AdminController
             'slug'             => $model->uniqueSlug(mb_substr($item->slug, 0, 170) . '-copy'),
             'status'           => 'draft',
             'published_at'     => null,
+            'published_until'  => null,
             'author_id'        => current_user()->id,
             'meta_title'       => $item->meta_title,
             'meta_description' => $item->meta_description,
@@ -234,6 +288,7 @@ class Entries extends AdminController
             'slug'             => (string) $this->request->getPost('slug') ?: url_title($title, '-', true),
             'status'           => (string) $this->request->getPost('status') ?: 'draft',
             'published_at'     => $date !== '' ? date('Y-m-d H:i:s', strtotime($date)) : date('Y-m-d H:i:s'),
+            'published_until'  => (string) $this->request->getPost('published_until') !== '' ? date('Y-m-d H:i:s', strtotime((string) $this->request->getPost('published_until'))) : null,
             'meta_title'       => (string) $this->request->getPost('meta_title'),
             'meta_description' => (string) $this->request->getPost('meta_description'),
             'author_name'      => current_user()->name,
@@ -347,6 +402,12 @@ class Entries extends AdminController
             ?? throw PageNotFoundException::forPageNotFound();
     }
 
+    private function findTrashed(object $type, int $id): object
+    {
+        return EntryModel::for($type)->onlyDeleted()->find($id)
+            ?? throw PageNotFoundException::forPageNotFound();
+    }
+
     /**
      * [built-in columns, nested field values], or a redirect back with errors.
      */
@@ -359,11 +420,19 @@ class Entries extends AdminController
         $errors ??= [];
         $values   = service('fields')->sanitizeValues($type->fields, $this->request->getPost('fields'), $errors);
 
+        $data = $this->validator->getValidated();
+
+        // 公開終了日時 (optional): empty = no end. It must come after the publish date.
+        $until = ($data['published_until'] ?? '') !== '' ? date('Y-m-d H:i:s', strtotime($data['published_until'])) : null;
+        $from  = ($data['published_at'] ?? '') !== '' ? date('Y-m-d H:i:s', strtotime($data['published_at'])) : date('Y-m-d H:i:s');
+        if ($until !== null && $until <= $from) {
+            $errors[] = '公開終了日時は公開日時より後に設定してください。';
+        }
+
         if ($errors !== []) {
             return $this->backWithErrors($errors);
         }
 
-        $data  = $this->validator->getValidated();
         $title = $this->titleFrom($type, $values);
 
         $slug = mb_substr(url_title(trim($data['slug'] ?? '') ?: $title, '-', true), 0, 180);
@@ -385,6 +454,7 @@ class Entries extends AdminController
             'slug'             => $slug,
             'status'           => $data['status'],
             'published_at'     => $publishedAt,
+            'published_until'  => $until,
             'meta_title'       => trim($data['meta_title'] ?? ''),
             'meta_description' => trim($data['meta_description'] ?? ''),
         ], $values];
