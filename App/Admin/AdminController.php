@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 abstract class AdminController extends BaseController
 {
     /** Languages the admin panel is available in. First is the default. */
-    public const LOCALES = ['ja' => '日本語', 'en' => 'English'];
+    public const LOCALES = ['en' => 'English', 'ja' => '日本語'];
 
     protected string $locale = 'ja';
 

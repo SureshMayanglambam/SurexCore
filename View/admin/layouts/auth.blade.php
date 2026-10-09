@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ $locale ?? 'ja' }}" data-bs-theme="light">
+<html lang="{{ $locale ?? 'en' }}" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,7 @@
                     <div class="text-center mt-3 small">
                         @foreach($locales as $code => $label)
                             @if(!$loop->first)<span class="text-secondary">·</span>@endif
-                            <a class="@if(($locale ?? 'ja') === $code) fw-semibold @else text-secondary @endif" href="{{ url_to('admin.lang', $code) }}">{{ $label }}</a>
+                            <a class="@if(($locale ?? 'en') === $code) fw-semibold @else text-secondary @endif" href="{{ url_to('admin.lang', $code) }}">{{ $label }}</a>
                         @endforeach
                     </div>
                 @endisset

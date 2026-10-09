@@ -20,17 +20,17 @@ class Install extends BaseController
     public function store(): RedirectResponse|string
     {
         $rules = [
-            'site_name'        => ['label' => 'サイト名', 'rules' => 'required|max_length[100]'],
-            'admin_name'       => ['label' => '管理者の名前', 'rules' => 'required|max_length[100]'],
-            'admin_email'      => ['label' => '管理者のメールアドレス', 'rules' => 'required|valid_email|max_length[191]'],
-            'admin_password'   => ['label' => 'パスワード', 'rules' => 'required|min_length[10]|max_length[72]'],
-            'password_confirm' => ['label' => 'パスワード（確認）', 'rules' => 'required|matches[admin_password]'],
-            'db_host'          => ['label' => 'ホスト', 'rules' => 'required|max_length[255]'],
-            'db_port'          => ['label' => 'ポート', 'rules' => 'required|is_natural_no_zero|less_than[65536]'],
-            'db_name'          => ['label' => 'データベース名', 'rules' => 'required|max_length[64]'],
-            'db_user'          => ['label' => 'ユーザー名', 'rules' => 'required|max_length[64]'],
-            'db_pass'          => ['label' => 'パスワード', 'rules' => 'permit_empty|max_length[255]'],
-            'db_prefix'        => ['label' => 'テーブル接頭辞', 'rules' => 'permit_empty|max_length[10]|regex_match[/^[a-z0-9_]+$/]'],
+            'site_name'        => ['label' => 'Site name', 'rules' => 'required|max_length[100]'],
+            'admin_name'       => ['label' => 'Administrator name', 'rules' => 'required|max_length[100]'],
+            'admin_email'      => ['label' => 'Administrator email', 'rules' => 'required|valid_email|max_length[191]'],
+            'admin_password'   => ['label' => 'Password', 'rules' => 'required|min_length[10]|max_length[72]'],
+            'password_confirm' => ['label' => 'Password (confirm)', 'rules' => 'required|matches[admin_password]'],
+            'db_host'          => ['label' => 'Host', 'rules' => 'required|max_length[255]'],
+            'db_port'          => ['label' => 'Port', 'rules' => 'required|is_natural_no_zero|less_than[65536]'],
+            'db_name'          => ['label' => 'Database name', 'rules' => 'required|max_length[64]'],
+            'db_user'          => ['label' => 'Username', 'rules' => 'required|max_length[64]'],
+            'db_pass'          => ['label' => 'Password', 'rules' => 'permit_empty|max_length[255]'],
+            'db_prefix'        => ['label' => 'Table prefix', 'rules' => 'permit_empty|max_length[10]|regex_match[/^[a-z0-9_]+$/]'],
         ];
 
         if (! $this->validate($rules)) {
@@ -49,7 +49,7 @@ class Install extends BaseController
         ];
 
         if (! $installer->canWriteEnv()) {
-            return $this->form(['env' => 'CMSフォルダ内の .env ファイルに書き込めません。Webサーバーに書き込み権限を付与してから、もう一度お試しください。']);
+            return $this->form(['env' => 'Cannot write to the .env file in the CMS folder. Give the web server write permission and try again.']);
         }
 
         try {
@@ -57,13 +57,13 @@ class Install extends BaseController
         } catch (\RuntimeException $e) {
             log_message('error', $e->getMessage());
 
-            return $this->form(['db' => 'データベースに接続できませんでした。ホスト、データベース名、ユーザー名、パスワードを確認してください。']);
+            return $this->form(['db' => 'Could not connect to the database. Check the host, database name, username and password.']);
         }
 
         $users = new UserModel($connection);
 
         if ($connection->tableExists('users') && $users->countAllResults() > 0) {
-            return $this->form(['db' => 'このデータベースには SurexCore がすでにインストールされています。空のデータベースを使用するか、別のテーブル接頭辞を指定してください。']);
+            return $this->form(['db' => 'SurexCore is already installed in this database. Use an empty database, or choose a different table prefix.']);
         }
 
         try {
@@ -88,11 +88,11 @@ class Install extends BaseController
         } catch (\Throwable $e) {
             log_message('critical', 'Installation failed: {message}', ['message' => $e->getMessage()]);
 
-            return $this->form(['install' => 'インストールに失敗しました: ' . $e->getMessage()]);
+            return $this->form(['install' => 'Installation failed: ' . $e->getMessage()]);
         }
 
         return redirect()->route('admin.login')
-            ->with('success', 'SurexCore のインストールが完了しました。作成した管理者アカウントでログインしてください。');
+            ->with('success', 'SurexCore has been installed. Log in with the administrator account you just created.');
     }
 
     private function form(array $errors = []): string

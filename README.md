@@ -118,7 +118,7 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 | Code | Laravel-style models and queries (`NewsModel::published()->latest()->paginate(10)`), `make:cms-model` / `make:cms-controller` generators, a `Page` controller for view-only pages, a sample with every field kind |
 | Media | Media library (grid, search, drag & drop upload, where-used, delete), "メディアから選択" in every image/file field, CKEditor 5 image upload |
 | Site | Blade frontend you write yourself, contact form (入力 → 確認 → 完了) with **file attachment** and mail templates, automatic `sitemap.xml` / `robots.txt`, noindex switch, maintenance mode |
-| Admin | Japanese / English UI (switch in the top bar), roles, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
+| Admin | English / Japanese UI (English by default, switch in the top bar), roles, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
 | Ops | Installer, automatic migrations, hidden admin URL, **one-click deploy packages** in the admin (or `deploy.sh`) |
 | Security | Locked-down web server rules, no code execution in uploads, strict headers + admin CSP, CSRF protection, secure cookies, sanitized editor HTML, metadata-free images — see [Security](#security) |
 
@@ -395,7 +395,7 @@ model(InquiryModel::class)->store('recruit', ['お名前' => $name, …], $name,
 
 ## Admin panel features
 
-The admin panel is available in **Japanese and English** — switch any time from the top bar (remembered per browser). The menu labels below are shown in Japanese.
+The admin panel is available in **English and Japanese** — English by default, switch any time from the top bar (remembered per browser). The menu labels below are shown in Japanese for reference.
 
 | Menu | Who | What |
 |---|---|---|
