@@ -11,7 +11,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.3 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.1.4 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
