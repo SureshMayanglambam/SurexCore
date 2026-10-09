@@ -11,7 +11,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.2 (developer preview) · Developed by Wonderful Door
+Version 0.1.3 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -118,9 +118,9 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 | Code | Laravel-style models and queries (`NewsModel::published()->latest()->paginate(10)`), `make:cms-model` / `make:cms-controller` generators, a `Page` controller for view-only pages, a sample with every field kind |
 | Media | Media library (grid, search, drag & drop upload, where-used, delete), "メディアから選択" in every image/file field, CKEditor 5 image upload |
 | Site | Blade frontend you write yourself, contact form (入力 → 確認 → 完了) with **file attachment** and mail templates, automatic `sitemap.xml` / `robots.txt`, noindex switch, maintenance mode |
-| Admin | Japanese UI, roles 管理者 / Web管理者, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
+| Admin | Japanese / English UI (switch in the top bar), roles, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
 | Ops | Installer, automatic migrations, hidden admin URL, **one-click deploy packages** in the admin (or `deploy.sh`) |
-| Security | Hardened `.htaccess` (no code in uploads, no source/config files served), strict headers + admin CSP, Secure cookies, sanitized editor HTML, metadata-free images — see [Security](#security) |
+| Security | Locked-down web server rules, no code execution in uploads, strict headers + admin CSP, CSRF protection, secure cookies, sanitized editor HTML, metadata-free images — see [Security](#security) |
 
 ## Folder structure
 
@@ -395,6 +395,8 @@ model(InquiryModel::class)->store('recruit', ['お名前' => $name, …], $name,
 
 ## Admin panel features
 
+The admin panel is available in **Japanese and English** — switch any time from the top bar (remembered per browser). The menu labels below are shown in Japanese.
+
 | Menu | Who | What |
 |---|---|---|
 | ダッシュボード | all | stats, charts, recent entries; 管理者 also see activity, system status and **disk usage** |
@@ -537,26 +539,20 @@ Upload and extract the zip over `public_html/`. Code, templates and assets are r
 
 ## Security
 
-**Server (`.htaccess`)**
-- Only `public/` is reachable; `App/`, `View/`, `routes/` and `writable/` also deny access on their own.
-- `public/`: hidden files (`.env`, `.git`, `.htaccess`) and source/config/backup files (`.scss`, `.map`, `.sql`, `.log`, `.ini`, `composer.*`, `prepros.config`, …) return 403; no directory listing.
-- `public/uploads/`: PHP and other scripts never run; HTML/SVG/XML/JS/CSS are never served; documents are downloaded (`Content-Disposition: attachment`) with `nosniff`.
+SurexCore is built to be safe to run on shared hosting out of the box:
 
-**Headers** (`App/Filters/SecurityHeaders.php` + `.htaccess` for static files)
-- `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, HSTS on HTTPS; no `X-Powered-By`.
-- Admin panel: a strict Content-Security-Policy (own files only), `Cache-Control: no-store`, `X-Robots-Tag: noindex`. The website has no CSP by default — add your own once you know which scripts it loads.
+- **Locked-down web server** — only the public area is reachable; configuration, source and backup files are never served, directory listing is off, and the uploads area can never execute code.
+- **Strong HTTP headers** — protection against clickjacking, MIME-sniffing and information leakage, a strict Content-Security-Policy for the admin panel, and HSTS on HTTPS.
+- **CSRF protection** on every form, plus automatic output escaping to prevent cross-site scripting (XSS).
+- **Secure sessions & cookies** — HttpOnly, SameSite and Secure-on-HTTPS cookies, a neutral session name, and the old session destroyed on login.
+- **Safe passwords & login** — modern password hashing, a minimum length, login rate limiting, and generic error messages that don't reveal whether an account exists.
+- **Hidden admin URL**, the installer locked after setup, and errors hidden in production.
+- **Sanitized rich text** — editor HTML is cleaned on save (no scripts, iframes, event handlers or dangerous links).
+- **Safe uploads** — the file type is detected from the contents (not the name), files get random names, and images are re-encoded to strip metadata (EXIF/GPS) and hidden payloads.
+- **Private attachments** — contact-form files and saved inquiries are kept out of public reach and are only downloadable by logged-in admins.
+- **Activity log** of logins (including failures) and changes, and **no plugin system** — no third-party plugin code to attack.
 
-**Application**
-- CSRF on every POST/PUT/DELETE (token masked against BREACH); Blade escapes output by default.
-- Cookies `HttpOnly`, `SameSite=Lax`, and `Secure` automatically on HTTPS; neutral session cookie name; old session destroyed on login.
-- `password_hash()` (rehashed when PHP's default changes), passwords ≥ 10 characters, login rate limiting (5/min per IP), generic login errors.
-- Hidden admin URL (`cms.adminPath`); `/install` locked after installation; errors hidden in production.
-- Editor (CKEditor) HTML is sanitized on save: no `<script>`, `<iframe>`, forms, SVG, `on…=` handlers or `javascript:`/`data:` links (`App/Libraries/HtmlSanitizer.php`).
-- Uploads: type detected from the contents, random file names, no SVG; images are re-encoded — EXIF/GPS metadata and hidden payloads removed, photos turned upright (`App/Libraries/ImageCleaner.php`).
-- Contact attachments and saved inquiries are stored outside the web root; downloads only for logged-in admins.
-- Activity log of logins (incl. failures) and changes; no plugin system — no third-party plugin code to attack.
-
-**On every live site:** `CI_ENVIRONMENT = production`, HTTPS with `app.forceGlobalSecureRequests = true`, a unique `cms.adminPath`, strong passwords, regular `composer update` and backups.
+**On every live site:** run in production mode, use HTTPS, choose a unique admin path, set strong passwords, and keep dependencies updated with regular backups.
 
 ## License
 
@@ -575,4 +571,4 @@ SurexCore is shared as a developer preview — your feedback decides what comes 
 - Missing features you needed while building a real site
 - Hosting environments where installation or deployment failed
 
-Developed by **Wonderful Door**.
+Developed by **Suresh Mayanglambam**.

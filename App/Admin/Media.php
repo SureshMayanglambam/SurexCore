@@ -104,7 +104,7 @@ class Media extends AdminController
 
         log_activity('media.deleted', '「' . $media->original_name . '」を削除しました（' . $media->path . '）');
 
-        return redirect()->back()->with('success', '「' . $media->original_name . '」を削除しました。');
+        return redirect()->back()->with('success', lang('Admin.flash.media_deleted', [$media->original_name]));
     }
 
     public function upload(): ResponseInterface
@@ -118,14 +118,14 @@ class Media extends AdminController
 
         if ($file === null || ! $file->isValid()) {
             return $this->fail(match ($file?->getError()) {
-                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'ファイルサイズがサーバーの上限を超えています。',
-                UPLOAD_ERR_PARTIAL                        => 'アップロードが途中で中断されました。もう一度お試しください。',
-                null, UPLOAD_ERR_NO_FILE                  => 'ファイルが選択されていません。',
-                default                                   => 'ファイルのアップロードに失敗しました。',
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => lang('Admin.flash.up_too_big_srv'),
+                UPLOAD_ERR_PARTIAL                        => lang('Admin.flash.up_interrupted'),
+                null, UPLOAD_ERR_NO_FILE                  => lang('Admin.flash.up_no_file'),
+                default                                   => lang('Admin.flash.up_failed'),
             });
         }
         if ($file->getSizeByUnit('kb') > $config['max_kb']) {
-            return $this->fail(sprintf('ファイルサイズが大きすぎます（最大%dMB）。', $config['max_kb'] / 1024));
+            return $this->fail(sprintf(lang('Admin.flash.up_too_big'), $config['max_kb'] / 1024));
         }
 
         // Detected from the file contents, not from the browser or the file name.
@@ -134,21 +134,21 @@ class Media extends AdminController
 
         if ($ext === null) {
             return $this->fail($kind === 'image'
-                ? 'アップロードできる画像はJPG・PNG・GIF・WebPのみです。'
-                : 'この種類のファイルはアップロードできません。');
+                ? lang('Admin.flash.up_img_only')
+                : lang('Admin.flash.up_type_no'));
         }
         if (str_starts_with($mime, 'image/') && $kind === 'any' && $file->getSizeByUnit('kb') > self::KINDS['image']['max_kb']) {
-            return $this->fail(sprintf('画像のサイズが大きすぎます（最大%dMB）。', self::KINDS['image']['max_kb'] / 1024));
+            return $this->fail(sprintf(lang('Admin.flash.up_img_too_big'), self::KINDS['image']['max_kb'] / 1024));
         }
         if (($kind === 'image' || ($kind === 'any' && str_starts_with($mime, 'image/'))) && @getimagesize($file->getTempName()) === false) {
-            return $this->fail('正しい画像ファイルではありません。');
+            return $this->fail(lang('Admin.flash.up_img_invalid'));
         }
 
         $dir  = 'uploads/' . date('Y/m');
         $name = bin2hex(random_bytes(12)) . '.' . $ext;
 
         if (! is_dir(FCPATH . $dir) && ! mkdir(FCPATH . $dir, 0755, true)) {
-            return $this->fail('アップロード先のフォルダに書き込めません。');
+            return $this->fail(lang('Admin.flash.up_no_write'));
         }
 
         $file->move(FCPATH . $dir, $name);

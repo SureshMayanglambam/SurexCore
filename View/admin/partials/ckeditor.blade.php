@@ -11,7 +11,7 @@
 
 @push('scripts')
 <script src="{{ base_url('assets/vendor/ckeditor5/ckeditor5.umd.js') }}"></script>
-<script src="{{ base_url('assets/vendor/ckeditor5/ja.umd.js') }}"></script>
+@if($locale === 'ja')<script src="{{ base_url('assets/vendor/ckeditor5/ja.umd.js') }}"></script>@endif
 <script>
 window.wdEditors = (() => {
     const {
@@ -28,8 +28,8 @@ window.wdEditors = (() => {
 
     const config = counter => ({
         licenseKey: 'GPL',
-        language: 'ja',
-        translations: [window.CKEDITOR_TRANSLATIONS],
+        language: '{{ $locale }}',
+        translations: window.CKEDITOR_TRANSLATIONS ? [window.CKEDITOR_TRANSLATIONS] : [],
         plugins: [
             Essentials, Paragraph, Heading, Bold, Italic, Underline, Strikethrough, RemoveFormat,
             FontColor, Alignment, Link, AutoLink, List, BlockQuote, HorizontalLine, CodeBlock,
@@ -49,10 +49,10 @@ window.wdEditors = (() => {
         },
         heading: {
             options: [
-                { model: 'paragraph', title: '段落', class: 'ck-heading_paragraph' },
-                { model: 'heading2', view: 'h2', title: '見出し2', class: 'ck-heading_heading2' },
-                { model: 'heading3', view: 'h3', title: '見出し3', class: 'ck-heading_heading3' },
-                { model: 'heading4', view: 'h4', title: '見出し4', class: 'ck-heading_heading4' }
+                { model: 'paragraph', title: {!! json_encode(lang('Admin.ck.paragraph')) !!}, class: 'ck-heading_paragraph' },
+                { model: 'heading2', view: 'h2', title: {!! json_encode(lang('Admin.ck.heading2')) !!}, class: 'ck-heading_heading2' },
+                { model: 'heading3', view: 'h3', title: {!! json_encode(lang('Admin.ck.heading3')) !!}, class: 'ck-heading_heading3' },
+                { model: 'heading4', view: 'h4', title: {!! json_encode(lang('Admin.ck.heading4')) !!}, class: 'ck-heading_heading4' }
             ]
         },
         link: { addTargetToExternalLinks: true, defaultProtocol: 'https://' },
@@ -76,7 +76,7 @@ window.wdEditors = (() => {
                 { name: /^.*$/, attributes: [{ key: /^on/i, value: true }] }
             ]
         },
-        wordCount: { onUpdate: stats => counter.textContent = '文字数: ' + stats.characters.toLocaleString() }
+        wordCount: { onUpdate: stats => counter.textContent = {!! json_encode(lang('Admin.ck.word_count')) !!} + stats.characters.toLocaleString() }
     });
 
     function init(root = document) {
@@ -93,7 +93,7 @@ window.wdEditors = (() => {
                     editor.model.document.on('change:data', () =>
                         textarea.dispatchEvent(new CustomEvent('fields:changed', { bubbles: true })));
                 })
-                .catch(error => console.error('CKEditor の読み込みに失敗しました:', error));
+                .catch(error => console.error({!! json_encode(lang('Admin.ck.load_fail')) !!}, error));
         });
     }
 

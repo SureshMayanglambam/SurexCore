@@ -1,5 +1,5 @@
 @if($status === 'published')
-    <span class="badge text-bg-success">公開</span>
+    <span class="badge text-bg-success">{{ lang('Admin.published') }}</span>
 @else
-    <span class="badge text-bg-secondary">下書き</span>
+    <span class="badge text-bg-secondary">{{ lang('Admin.draft') }}</span>
 @endif

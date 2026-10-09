@@ -33,20 +33,20 @@ class Branding extends AdminController
         $file = $this->request->getFile('logo');
 
         if ($file === null || ! $file->isValid()) {
-            return redirect()->route('admin.branding')->with('error', 'アップロードする画像ファイルを選択してください。');
+            return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_pick'));
         }
         if ($file->getSizeByUnit('kb') > self::MAX_KB) {
-            return redirect()->route('admin.branding')->with('error', 'ロゴのファイルサイズが大きすぎます（最大2MB）。');
+            return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_too_big'));
         }
 
         // Checked by the file contents, not by the file name.
         $ext = self::TYPES[$file->getMimeType()] ?? null;
         if ($ext === null || @getimagesize($file->getTempName()) === false) {
-            return redirect()->route('admin.branding')->with('error', 'ロゴはPNG・JPG・WebP・GIF形式の画像を指定してください。');
+            return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_type'));
         }
 
         if (! is_dir(FCPATH . self::DIR) && ! mkdir(FCPATH . self::DIR, 0755, true)) {
-            return redirect()->route('admin.branding')->with('error', 'アップロードフォルダに書き込めません。');
+            return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_no_write'));
         }
 
         $name = 'logo-' . bin2hex(random_bytes(6)) . '.' . $ext;
@@ -58,7 +58,7 @@ class Branding extends AdminController
         model(SettingModel::class)->put('site_logo', self::DIR . '/' . $name);
         log_activity('settings.logo', 'サイトロゴをアップロードしました');
 
-        return redirect()->route('admin.branding')->with('success', 'ロゴを更新しました。');
+        return redirect()->route('admin.branding')->with('success', lang('Admin.flash.brand_updated'));
     }
 
     public function delete(): RedirectResponse
@@ -67,7 +67,7 @@ class Branding extends AdminController
         model(SettingModel::class)->put('site_logo', '');
         log_activity('settings.logo', 'サイトロゴを削除しました');
 
-        return redirect()->route('admin.branding')->with('success', 'ロゴを削除しました。代わりにサイト名が表示されます。');
+        return redirect()->route('admin.branding')->with('success', lang('Admin.flash.brand_deleted'));
     }
 
     /**

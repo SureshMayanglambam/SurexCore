@@ -44,7 +44,7 @@ class Inquiries extends AdminController
         $item = $this->find($id);
         model(InquiryModel::class)->update($item->id, ['read_at' => null]);
 
-        return redirect()->route('admin.inquiries')->with('success', '未読に戻しました。');
+        return redirect()->route('admin.inquiries')->with('success', lang('Admin.flash.inq_unread'));
     }
 
     public function delete(int $id): RedirectResponse
@@ -53,7 +53,7 @@ class Inquiries extends AdminController
         model(InquiryModel::class)->remove($item);
         log_activity('inquiry.deleted', 'お問い合わせ（' . ($item->name ?: '名前なし') . '・' . $item->created_at . '）を削除しました');
 
-        return redirect()->route('admin.inquiries')->with('success', 'お問い合わせを削除しました。');
+        return redirect()->route('admin.inquiries')->with('success', lang('Admin.flash.inq_deleted'));
     }
 
     public function attachment(int $id): DownloadResponse

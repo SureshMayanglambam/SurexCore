@@ -31,7 +31,7 @@ class Backup extends AdminController
         $withUploads = $this->request->getPost('type') === 'full';
 
         if ($withUploads && ! class_exists(\ZipArchive::class)) {
-            return redirect()->route('admin.backup')->with('error', 'サーバーで ZIP 機能（PHP zip 拡張）が使えないため、データベースのみ保存できます。');
+            return redirect()->route('admin.backup')->with('error', lang('Admin.flash.zip_db_only'));
         }
 
         @set_time_limit(0);
@@ -73,10 +73,10 @@ class Backup extends AdminController
         $type = $this->request->getPost('type') === 'code' ? 'code' : 'site';
 
         if (! class_exists(\ZipArchive::class)) {
-            return redirect()->route('admin.backup')->with('error', 'サーバーで ZIP 機能（PHP zip 拡張）が使えないため、パッケージを作成できません。');
+            return redirect()->route('admin.backup')->with('error', lang('Admin.flash.zip_no_package'));
         }
         if (! is_file(ROOTPATH . 'vendor/autoload.php')) {
-            return redirect()->route('admin.backup')->with('error', 'vendor フォルダがありません。composer install を実行してください。');
+            return redirect()->route('admin.backup')->with('error', lang('Admin.flash.no_vendor'));
         }
 
         @set_time_limit(0);
@@ -115,7 +115,7 @@ class Backup extends AdminController
         $zip = new \ZipArchive();
         $zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $zip->addFile($sqlFile, 'database.sql');
-        $zip->addFromString('README.txt', "復元方法\n1. database.sql を phpMyAdmin でインポート\n2. uploads フォルダを public/uploads/ に戻す\n3. inquiries フォルダ（お問い合わせの添付ファイル）があれば writable/uploads/inquiries/ に戻す\n");
+        $zip->addFromString('README.txt', lang('Admin.backup.readme'));
 
         // Uploaded media, and the attachments of saved お問い合わせ.
         foreach ([FCPATH . 'uploads' => 'uploads/', WRITEPATH . 'uploads/inquiries' => 'inquiries/'] as $root => $prefix) {

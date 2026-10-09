@@ -137,10 +137,10 @@
         if (button.classList.contains('fld-row-remove')) {
             const min = +repeater.dataset.min;
             if (min > 0 && row.parentElement.children.length <= min) {
-                alert(`最低${min}行が必要です。`);
+                alert(window.sxt('min_rows_alert', min));
                 return;
             }
-            if (!confirm('この行を削除しますか？')) return;
+            if (!confirm(window.sxt('del_row_confirm'))) return;
             await window.wdEditors?.destroy(row);
             row.remove();
         } else if (button.classList.contains('fld-row-up') && row.previousElementSibling) {
@@ -176,15 +176,15 @@
         const body = new FormData();
         body.append('upload', fileInput.files[0]);
 
-        status.textContent = 'アップロード中…';
+        status.textContent = window.sxt('uploading');
         status.classList.remove('text-danger');
 
         try {
             const response = await fetch(`${uploadUrl}?kind=${box.dataset.kind}`, {
                 method: 'POST', body, headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' }
             });
-            const data = await response.json().catch(() => ({ error: { message: 'セッションの有効期限が切れた可能性があります。ページを再読み込みして、もう一度ログインしてください。' } }));
-            if (!response.ok || data.error) throw new Error(data.error?.message || 'アップロードに失敗しました。');
+            const data = await response.json().catch(() => ({ error: { message: window.sxt('session_expired_login') } }));
+            if (!response.ok || data.error) throw new Error(data.error?.message || window.sxt('upload_failed'));
 
             setUpload(box, data);
             status.textContent = '';

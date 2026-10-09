@@ -24,7 +24,7 @@ class Dashboard extends AdminController
         $months = [];
         for ($i = self::MONTHS - 1; $i >= 0; $i--) {
             $ts                        = strtotime("first day of -{$i} months");
-            $months[date('Y-m', $ts)] = date('n', $ts) . '月';
+            $months[date('Y-m', $ts)] = date(lang('Admin.dash.month_fmt'), $ts);
         }
 
         $types  = [];
@@ -178,11 +178,11 @@ class Dashboard extends AdminController
             ['CMS', \Config\Cms::NAME . ' ' . config('Cms')->version, true],
             ['CodeIgniter', CodeIgniter::CI_VERSION, true],
             ['PHP', PHP_VERSION, version_compare(PHP_VERSION, '8.2', '>=')],
-            ['データベース', 'MySQL ' . db_connect()->getVersion(), true],
-            ['モード', ['production' => '本番', 'development' => '開発', 'testing' => 'テスト'][ENVIRONMENT] ?? ENVIRONMENT, ENVIRONMENT === 'production' ? true : null],
-            ['メール（SMTP）', $mail->SMTPHost !== '' ? $mail->SMTPHost : '未設定', $mail->protocol !== 'smtp' || $mail->SMTPHost !== ''],
-            ['メンテナンスモード', setting('maintenance_mode') === '1' ? 'オン' : 'オフ', setting('maintenance_mode') === '1' ? null : true],
-            ['アップロードフォルダ', is_writable(FCPATH . 'uploads') ? '書き込み可' : '書き込み不可', is_writable(FCPATH . 'uploads')],
+            [lang('Admin.sys.database'), 'MySQL ' . db_connect()->getVersion(), true],
+            [lang('Admin.sys.mode'), ['production' => lang('Admin.sys.production'), 'development' => lang('Admin.sys.development'), 'testing' => lang('Admin.sys.testing')][ENVIRONMENT] ?? ENVIRONMENT, ENVIRONMENT === 'production' ? true : null],
+            [lang('Admin.sys.mail'), $mail->SMTPHost !== '' ? $mail->SMTPHost : lang('Admin.sys.not_set'), $mail->protocol !== 'smtp' || $mail->SMTPHost !== ''],
+            [lang('Admin.sys.maintenance'), setting('maintenance_mode') === '1' ? lang('Admin.sys.on') : lang('Admin.sys.off'), setting('maintenance_mode') === '1' ? null : true],
+            [lang('Admin.sys.upload_dir'), is_writable(FCPATH . 'uploads') ? lang('Admin.sys.writable') : lang('Admin.sys.not_writable'), is_writable(FCPATH . 'uploads')],
         ];
     }
 }

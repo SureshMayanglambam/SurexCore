@@ -26,6 +26,9 @@ $routes->group(config('Cms')->adminPath, ['filter' => 'dbupgrade'], static funct
     $routes->get('login', [Auth::class, 'login'], ['as' => 'admin.login']);
     $routes->post('login', [Auth::class, 'attempt'], ['as' => 'admin.login.attempt']);
 
+    // Admin UI language switch (works on the login page too)
+    $routes->get('lang/(:segment)', [Auth::class, 'setLocale'], ['as' => 'admin.lang']);
+
     // Admin + WebAdmin
     $routes->group('', ['filter' => 'auth'], static function ($routes) {
         $routes->post('logout', [Auth::class, 'logout'], ['as' => 'admin.logout']);

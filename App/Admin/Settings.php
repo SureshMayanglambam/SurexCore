@@ -44,7 +44,7 @@ class Settings extends AdminController
             'mail'        => [
                 'host'       => $mail->SMTPHost,
                 'port'       => $mail->SMTPPort,
-                'encryption' => $mail->SMTPCrypto ?: 'なし',
+                'encryption' => $mail->SMTPCrypto ?: lang('Admin.none'),
                 'from'       => trim(($mail->fromName ?: config('Cms')->appName) . ' <' . ($mail->fromEmail ?: config('Cms')->adminEmail) . '>'),
                 'configured' => $mail->protocol !== 'smtp' || $mail->SMTPHost !== '',
             ],
@@ -54,14 +54,14 @@ class Settings extends AdminController
     public function update(): RedirectResponse
     {
         $rules = [
-            'site_name'               => ['label' => 'サイト名', 'rules' => 'required|max_length[100]'],
-            'site_tagline'            => ['label' => 'キャッチフレーズ', 'rules' => 'permit_empty|max_length[255]'],
-            'date_format'             => ['label' => '日付の形式', 'rules' => 'required|max_length[20]'],
-            'posts_per_page'          => ['label' => '1ページの表示件数', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[100]'],
-            'activity_retention_days' => ['label' => '操作ログの保存期間', 'rules' => 'required|is_natural_no_zero|less_than_equal_to[3650]'],
-            'maintenance_mode'        => ['label' => 'メンテナンスモード', 'rules' => 'permit_empty|in_list[0,1]'],
-            'search_noindex'          => ['label' => '検索エンジンにインデックスさせない', 'rules' => 'permit_empty|in_list[0,1]'],
-            'store_inquiries'         => ['label' => 'お問い合わせを保存する', 'rules' => 'permit_empty|in_list[0,1]'],
+            'site_name'               => ['label' => lang('Admin.val.site_name'), 'rules' => 'required|max_length[100]'],
+            'site_tagline'            => ['label' => lang('Admin.val.tagline'), 'rules' => 'permit_empty|max_length[255]'],
+            'date_format'             => ['label' => lang('Admin.val.date_format'), 'rules' => 'required|max_length[20]'],
+            'posts_per_page'          => ['label' => lang('Admin.val.per_page'), 'rules' => 'required|is_natural_no_zero|less_than_equal_to[100]'],
+            'activity_retention_days' => ['label' => lang('Admin.val.retention'), 'rules' => 'required|is_natural_no_zero|less_than_equal_to[3650]'],
+            'maintenance_mode'        => ['label' => lang('Admin.val.maintenance'), 'rules' => 'permit_empty|in_list[0,1]'],
+            'search_noindex'          => ['label' => lang('Admin.val.noindex'), 'rules' => 'permit_empty|in_list[0,1]'],
+            'store_inquiries'         => ['label' => lang('Admin.val.store_inq'), 'rules' => 'permit_empty|in_list[0,1]'],
         ];
 
         $input                     = $this->request->getPost(array_keys($rules));
@@ -74,7 +74,7 @@ class Settings extends AdminController
         }
         // Not an in_list rule: some formats contain commas.
         if (! in_array($input['date_format'], self::DATE_FORMATS, true)) {
-            return $this->backWithErrors(['date_format' => '日付の形式は一覧から選択してください。']);
+            return $this->backWithErrors(['date_format' => lang('Admin.flash.date_format_list')]);
         }
 
         $settings = model(SettingModel::class);
@@ -93,7 +93,7 @@ class Settings extends AdminController
             log_activity('settings.updated', '設定を変更しました: ' . implode('、', $changed));
         }
 
-        return redirect()->route('admin.settings')->with('success', '設定を保存しました。');
+        return redirect()->route('admin.settings')->with('success', lang('Admin.flash.settings_saved'));
     }
 
     /**
@@ -104,15 +104,17 @@ class Settings extends AdminController
         $user = current_user();
 
         if (empty($user->email)) {
-            return redirect()->route('admin.settings')->with('error', 'アカウントにメールアドレスが登録されていません。マイプロフィールで追加してください。');
+            return redirect()->route('admin.settings')->with('error', lang('Admin.flash.no_email_profile'));
         }
 
         $sent = send_mail(
             $user->email,
-            'テストメール（' . setting('site_name', config('Cms')->appName) . '）',
-            '<p>これは <strong>' . esc(setting('site_name', '')) . '</strong> の管理画面から送信されたテストメールです。</p>'
-            . '<p>このメールが届いていれば、.env のSMTP設定は正常に動作しています。</p>'
-            . '<p style="color:#888">送信日時: ' . date('Y-m-d H:i:s') . '（送信サーバー: ' . esc(config('Email')->SMTPHost) . '）</p>',
+            lang('Admin.mail.test_subject', [setting('site_name', config('Cms')->appName)]),
+            lang('Admin.mail.test_body', [
+                esc(setting('site_name', '')),
+                date('Y-m-d H:i:s'),
+                esc(config('Email')->SMTPHost),
+            ]),
         );
 
         log_activity('settings.test_email', "{$user->email} 宛てのテストメールの送信に" . ($sent ? '成功しました' : '失敗しました'));
@@ -120,8 +122,8 @@ class Settings extends AdminController
         return redirect()->route('admin.settings')->with(
             $sent ? 'success' : 'error',
             $sent
-                ? "{$user->email} 宛てにテストメールを送信しました。"
-                : 'テストメールを送信できませんでした。.env の email.* 設定を確認してください（詳細は writable/logs にあります）。',
+                ? lang('Admin.flash.test_sent', [$user->email])
+                : lang('Admin.flash.test_failed'),
         );
     }
 }

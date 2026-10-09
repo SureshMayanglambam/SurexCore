@@ -18,14 +18,17 @@ use CodeIgniter\HTTP\ResponseInterface;
 class Entries extends AdminController
 {
     /** Fixed inputs every entry has, besides its custom fields. */
-    private const RULES = [
-        'slug'             => ['label' => 'スラッグ', 'rules' => 'permit_empty|max_length[191]'],
-        'status'           => ['label' => 'ステータス', 'rules' => 'required|in_list[draft,published]'],
-        'published_at'     => ['label' => '公開日時', 'rules' => 'permit_empty|valid_date[Y-m-d\TH:i]'],
-        'published_until'  => ['label' => '公開終了日時', 'rules' => 'permit_empty|valid_date[Y-m-d\TH:i]'],
-        'meta_title'       => ['label' => 'メタタイトル', 'rules' => 'permit_empty|max_length[255]'],
-        'meta_description' => ['label' => 'メタディスクリプション', 'rules' => 'permit_empty|max_length[500]'],
-    ];
+    private function rules(): array
+    {
+        return [
+            'slug'             => ['label' => lang('Admin.val.slug'), 'rules' => 'permit_empty|max_length[191]'],
+            'status'           => ['label' => lang('Admin.val.status'), 'rules' => 'required|in_list[draft,published]'],
+            'published_at'     => ['label' => lang('Admin.val.published_at'), 'rules' => 'permit_empty|valid_date[Y-m-d\TH:i]'],
+            'published_until'  => ['label' => lang('Admin.val.published_until'), 'rules' => 'permit_empty|valid_date[Y-m-d\TH:i]'],
+            'meta_title'       => ['label' => lang('Admin.val.meta_title'), 'rules' => 'permit_empty|max_length[255]'],
+            'meta_description' => ['label' => lang('Admin.val.meta_desc'), 'rules' => 'permit_empty|max_length[500]'],
+        ];
+    }
 
     public function index(string $typeSlug): string
     {
@@ -115,7 +118,7 @@ class Entries extends AdminController
 
         log_activity('entry.created', "{$type->singular}「{$data['title']}」を作成しました", $type->slug, $id);
 
-        return redirect()->route('admin.entries.edit', [$type->slug, $id])->with('success', "{$type->singular}を作成しました。");
+        return redirect()->route('admin.entries.edit', [$type->slug, $id])->with('success', lang('Admin.flash.created', [$type->singular]));
     }
 
     public function edit(string $typeSlug, int $id): string
@@ -150,7 +153,7 @@ class Entries extends AdminController
         $model->saveEntry($data, $values, $item->id);
         log_activity('entry.updated', "{$type->singular}「{$data['title']}」を更新しました", $type->slug, $item->id);
 
-        return redirect()->route('admin.entries.edit', [$type->slug, $item->id])->with('success', "{$type->singular}を更新しました。");
+        return redirect()->route('admin.entries.edit', [$type->slug, $item->id])->with('success', lang('Admin.flash.updated', [$type->singular]));
     }
 
     public function delete(string $typeSlug, int $id): RedirectResponse
@@ -161,7 +164,7 @@ class Entries extends AdminController
         EntryModel::for($type)->delete($item->id);
         log_activity('entry.deleted', "{$type->singular}「{$item->title}」をゴミ箱に移動しました", $type->slug, $item->id);
 
-        return redirect()->route('admin.entries', [$type->slug])->with('success', "「{$item->title}」をゴミ箱に移動しました。");
+        return redirect()->route('admin.entries', [$type->slug])->with('success', lang('Admin.flash.trashed', [$item->title]));
     }
 
     /**
@@ -176,7 +179,7 @@ class Entries extends AdminController
         $model->builder()->where('id', $item->id)->update(['deleted_at' => null]);
         log_activity('entry.restored', "{$type->singular}「{$item->title}」をゴミ箱から復元しました", $type->slug, $item->id);
 
-        return redirect()->to(url_to('admin.entries', $type->slug) . '?trash=1')->with('success', "「{$item->title}」を復元しました。");
+        return redirect()->to(url_to('admin.entries', $type->slug) . '?trash=1')->with('success', lang('Admin.flash.restored', [$item->title]));
     }
 
     /**
@@ -190,7 +193,7 @@ class Entries extends AdminController
         EntryModel::for($type)->delete($item->id, true);
         log_activity('entry.purged', "{$type->singular}「{$item->title}」を完全に削除しました", $type->slug, $item->id);
 
-        return redirect()->to(url_to('admin.entries', $type->slug) . '?trash=1')->with('success', "「{$item->title}」を完全に削除しました。");
+        return redirect()->to(url_to('admin.entries', $type->slug) . '?trash=1')->with('success', lang('Admin.flash.purged', [$item->title]));
     }
 
     /**
@@ -206,7 +209,7 @@ class Entries extends AdminController
             log_activity('entry.purged', "{$type->name}のゴミ箱を空にしました（{$count}件）", $type->slug);
         }
 
-        return redirect()->route('admin.entries', [$type->slug])->with('success', "ゴミ箱を空にしました（{$count}件）。");
+        return redirect()->route('admin.entries', [$type->slug])->with('success', lang('Admin.flash.trash_emptied', [$count]));
     }
 
     /**
@@ -222,9 +225,9 @@ class Entries extends AdminController
         // Mark the copy in its title field, so the two are easy to tell apart in the list.
         $titleField = $this->titleFieldName($type);
         if ($titleField !== null && trim((string) ($values[$titleField] ?? '')) !== '') {
-            $values[$titleField] = trim((string) $values[$titleField]) . '（コピー）';
+            $values[$titleField] = trim((string) $values[$titleField]) . lang('Admin.flash.copy_suffix');
         }
-        $title = $this->titleFrom($type, $values) ?: $item->title . '（コピー）';
+        $title = $this->titleFrom($type, $values) ?: $item->title . lang('Admin.flash.copy_suffix');
 
         $newId = $model->saveEntry([
             'title'            => mb_substr($title, 0, 255),
@@ -240,7 +243,7 @@ class Entries extends AdminController
         log_activity('entry.duplicated', "{$type->singular}「{$item->title}」を複製しました", $type->slug, $newId);
 
         return redirect()->route('admin.entries.edit', [$type->slug, $newId])
-            ->with('success', "「{$item->title}」を複製しました。下書きとして保存されています。");
+            ->with('success', lang('Admin.flash.duplicated', [$item->title]));
     }
 
     private function form(object $type, ?object $item, array $values): string
@@ -279,7 +282,7 @@ class Entries extends AdminController
         // Validation errors are ignored: a preview may show half-finished content.
         $errors = [];
         $values = service('fields')->sanitizeValues($type->fields, $this->request->getPost('fields'), $errors);
-        $title  = $this->titleFrom($type, $values) ?: 'プレビュー';
+        $title  = $this->titleFrom($type, $values) ?: lang('Admin.preview.title');
         $date   = (string) $this->request->getPost('published_at');
 
         $item = (new Entry())->injectRawData([
@@ -380,9 +383,9 @@ class Entries extends AdminController
             . 'justify-content:space-between;gap:1rem;padding:.55rem 1rem;background:#072F1F;color:#fff;font:600 13px/1.4 system-ui,sans-serif;'
             . 'box-shadow:0 4px 16px rgba(0,0,0,.2)">'
             . '<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#B4F105;margin-right:.5rem"></span>'
-            . 'プレビュー（' . esc($type->name) . '）— 未保存の内容を表示しています。公開・保存はされていません。</span>'
+            . lang('Admin.previewbar.label', [esc($type->name)]) . '</span>'
             . '<button type="button" onclick="document.getElementById(\'wd-preview-bar\').remove();document.getElementById(\'wd-preview-space\').remove()" '
-            . 'style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:.15rem .6rem;cursor:pointer">閉じる</button>'
+            . 'style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:.15rem .6rem;cursor:pointer">' . lang('Admin.previewbar.close') . '</button>'
             . '</div>'
             // Push the page down so the bar doesn't cover the site header.
             . '<style id="wd-preview-space">html{scroll-padding-top:48px}body{margin-top:44px!important}</style>';
@@ -413,7 +416,7 @@ class Entries extends AdminController
      */
     private function payload(object $type, ?object $existing = null): array|RedirectResponse
     {
-        if (! $this->validate(self::RULES)) {
+        if (! $this->validate($this->rules())) {
             $errors = array_values($this->validator->getErrors());
         }
 
@@ -426,7 +429,7 @@ class Entries extends AdminController
         $until = ($data['published_until'] ?? '') !== '' ? date('Y-m-d H:i:s', strtotime($data['published_until'])) : null;
         $from  = ($data['published_at'] ?? '') !== '' ? date('Y-m-d H:i:s', strtotime($data['published_at'])) : date('Y-m-d H:i:s');
         if ($until !== null && $until <= $from) {
-            $errors[] = '公開終了日時は公開日時より後に設定してください。';
+            $errors[] = lang('Admin.flash.until_after');
         }
 
         if ($errors !== []) {

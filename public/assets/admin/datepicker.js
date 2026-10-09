@@ -13,10 +13,10 @@ window.wdDates = (() => {
 
             const withTime = input.type === 'datetime-local';
             const fp = flatpickr(input, {
-                locale: 'ja',
+                locale: (window.SXL?.flatpickr_locale === 'ja' ? 'ja' : 'default'),
                 dateFormat: withTime ? 'Y-m-d\\TH:i' : 'Y-m-d',
                 altInput: true,
-                altFormat: withTime ? 'Y年n月j日 H:i' : 'Y年n月j日',
+                altFormat: withTime ? window.sxt('datetime_alt_fmt') : window.sxt('date_alt_fmt'),
                 enableTime: withTime,
                 time_24hr: true,
                 disableMobile: true,
@@ -24,7 +24,7 @@ window.wdDates = (() => {
                 onChange: () => input.dispatchEvent(new Event('change', { bubbles: true })),
             });
 
-            fp.altInput.placeholder = input.placeholder || (withTime ? '日時を選択' : '日付を選択');
+            fp.altInput.placeholder = input.placeholder || (withTime ? window.sxt('select_datetime') : window.sxt('select_date'));
 
             // × button to empty the field
             const wrap = document.createElement('span');
@@ -34,7 +34,7 @@ window.wdDates = (() => {
             const clear = document.createElement('button');
             clear.type = 'button';
             clear.className = 'wd-date-clear';
-            clear.title = 'クリア';
+            clear.title = window.sxt('clear');
             clear.innerHTML = '<i class="bi bi-x-lg"></i>';
             clear.addEventListener('click', () => { fp.clear(); input.dispatchEvent(new Event('change', { bubbles: true })); });
             wrap.append(clear);

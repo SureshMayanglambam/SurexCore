@@ -19,7 +19,7 @@
      @if($cond) data-conditions="{{ json_encode($field['conditions'], $json) }}" @endif
      @if($reqIf) data-required-if="{{ json_encode($field['required_if'], $json) }}" @endif>
     @if($type !== 'toggle')
-        <label class="form-label fw-semibold" for="{{ $id }}">{{ $label }} @if($req)<span class="text-danger">*</span>@elseif($reqIf)<span class="text-danger fld-req-if" title="現在の選択内容では必須です" hidden>*</span>@endif</label>
+        <label class="form-label fw-semibold" for="{{ $id }}">{{ $label }} @if($req)<span class="text-danger">*</span>@elseif($reqIf)<span class="text-danger fld-req-if" title="{{ lang('Admin.field.required_when') }}" hidden>*</span>@endif</label>
     @endif
 
     @switch($type)
@@ -49,7 +49,7 @@
 
         @case('select')
             <select id="{{ $id }}" name="{{ $name }}" class="form-select">
-                <option value="">— 選択してください —</option>
+                <option value="">{{ lang('Admin.field.select_prompt') }}</option>
                 @foreach($field['choices'] as $choice)
                     <option value="{{ $choice['value'] }}" @selected((string) $value === $choice['value'])>{{ $choice['label'] }}</option>
                 @endforeach
@@ -83,7 +83,7 @@
         @case('relation')
             @php $options = service('fields')->relationOptions($field['related_type']); $chosen = array_map('strval', (array) $value); @endphp
             @if(! $options)
-                <div class="form-text">関連付けできる投稿がありません（コンテンツタイプ「{{ $field['related_type'] }}」に投稿を追加してください）。</div>
+                <div class="form-text">{{ lang('Admin.field.no_relation', [$field['related_type']]) }}</div>
             @elseif($field['multiple'])
                 <div id="{{ $id }}" class="fld-relation border rounded p-2">
                     <input type="hidden" name="{{ $name }}[]" value="">
@@ -97,7 +97,7 @@
                 </div>
             @else
                 <select id="{{ $id }}" name="{{ $name }}" class="form-select">
-                    <option value="">— 選択してください —</option>
+                    <option value="">{{ lang('Admin.field.select_prompt') }}</option>
                     @foreach($options as $optionId => $optionTitle)
                         <option value="{{ $optionId }}" @selected(in_array((string) $optionId, $chosen, true))>{{ $optionTitle }}</option>
                     @endforeach
@@ -109,7 +109,7 @@
             <input type="hidden" name="{{ $name }}" value="0">
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="{{ $id }}" name="{{ $name }}" value="1" @checked((bool) $value)>
-                <label class="form-check-label fw-semibold" for="{{ $id }}">{{ $label }} @if($req)<span class="text-danger">*</span>@elseif($reqIf)<span class="text-danger fld-req-if" title="現在の選択内容では必須です" hidden>*</span>@endif</label>
+                <label class="form-check-label fw-semibold" for="{{ $id }}">{{ $label }} @if($req)<span class="text-danger">*</span>@elseif($reqIf)<span class="text-danger fld-req-if" title="{{ lang('Admin.field.required_when') }}" hidden>*</span>@endif</label>
             </div>
             @break
 
@@ -128,14 +128,14 @@
                 <div class="ms-auto d-flex gap-2 align-items-center">
                     <span class="fld-upload-status small text-secondary"></span>
                     <button type="button" class="btn btn-sm btn-outline-secondary fld-media-pick">
-                        <i class="bi bi-images"></i> メディアから選択
+                        <i class="bi bi-images"></i> {{ lang('Admin.field.media_select') }}
                     </button>
                     <label class="btn btn-sm btn-outline-primary mb-0">
-                        <i class="bi bi-upload"></i> {{ $type === 'image' ? '画像をアップロード' : 'ファイルをアップロード' }}
+                        <i class="bi bi-upload"></i> {{ $type === 'image' ? lang('Admin.field.upload_image') : lang('Admin.field.upload_file') }}
                         <input type="file" class="fld-upload-input" hidden
                                accept="{{ $type === 'image' ? 'image/jpeg,image/png,image/gif,image/webp' : '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.csv,.jpg,.png' }}">
                     </label>
-                    <button type="button" class="btn btn-sm btn-outline-danger fld-upload-remove" title="削除" aria-label="削除" @if(!$path) hidden @endif><i class="bi bi-x-lg"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-danger fld-upload-remove" title="{{ lang('Admin.field.remove') }}" aria-label="{{ lang('Admin.field.remove') }}" @if(!$path) hidden @endif><i class="bi bi-x-lg"></i></button>
                 </div>
             </div>
             @break
@@ -166,7 +166,7 @@
                 <template class="fld-row-template">
                     @include('admin.fields.row', ['field' => $field, 'row' => service('fields')->defaults($field['sub_fields']), 'rowName' => $name . '[' . $token . ']'])
                 </template>
-                <button type="button" class="btn btn-sm btn-outline-primary fld-row-add"><i class="bi bi-plus-lg"></i> {{ $field['button_label'] ?? '行を追加' }}</button>
+                <button type="button" class="btn btn-sm btn-outline-primary fld-row-add"><i class="bi bi-plus-lg"></i> {{ $field['button_label'] ?? lang('Admin.field.add_row') }}</button>
             </div>
             @break
     @endswitch

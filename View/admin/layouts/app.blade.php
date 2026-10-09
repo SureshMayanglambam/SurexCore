@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ja" data-bs-theme="light">
+<html lang="{{ $locale }}" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>@yield('title') | {{ $siteName }} 管理画面</title>
+    <title>@yield('title') | {{ $siteName }} {{ lang('Admin.site_admin') }}</title>
     <link rel="stylesheet" href="{{ base_url('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/adminlte/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/flatpickr/flatpickr.min.css') }}">
@@ -24,15 +24,15 @@
         <div class="container-fluid">
             <ul class="navbar-nav align-items-center gap-2">
                 <li class="nav-item">
-                    <a class="btn-icon" data-lte-toggle="sidebar" href="#" role="button" aria-label="メニューの開閉"><i class="bi bi-layout-sidebar-inset"></i></a>
+                    <a class="btn-icon" data-lte-toggle="sidebar" href="#" role="button" aria-label="{{ lang('Admin.topbar.toggle_sidebar') }}"><i class="bi bi-layout-sidebar-inset"></i></a>
                 </li>
                 @if(!empty($contentTypes))
                     <li class="nav-item dropdown">
                         <button type="button" class="btn-create" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">新規作成</span>
+                            <i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">{{ lang('Admin.topbar.create_new') }}</span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li class="dropdown-header">新規投稿</li>
+                            <li class="dropdown-header">{{ lang('Admin.topbar.new_post') }}</li>
                             @foreach($contentTypes as $ct)
                                 <li><a class="dropdown-item" href="{{ url_to('admin.entries.create', $ct->slug) }}"><i class="bi bi-{{ $ct->icon }}"></i> {{ $ct->singular }}</a></li>
                             @endforeach
@@ -43,13 +43,23 @@
 
             <ul class="navbar-nav ms-auto align-items-center gap-2">
                 <li class="nav-item d-none d-md-block">
-                    <a href="{{ site_url('/') }}" class="btn-icon" target="_blank" rel="noopener" title="サイトを表示"><i class="bi bi-box-arrow-up-right"></i></a>
+                    <a href="{{ site_url('/') }}" class="btn-icon" target="_blank" rel="noopener" title="{{ lang('Admin.view_site') }}"><i class="bi bi-box-arrow-up-right"></i></a>
                 </li>
                 <li class="nav-item d-none d-md-block">
-                    <a class="btn-icon" href="#" data-lte-toggle="fullscreen" title="全画面表示">
+                    <a class="btn-icon" href="#" data-lte-toggle="fullscreen" title="{{ lang('Admin.fullscreen') }}">
                         <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
                         <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
                     </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="btn-icon" data-bs-toggle="dropdown" aria-expanded="false" title="{{ lang('Admin.language') }}">
+                        <i class="bi bi-translate"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        @foreach($locales as $code => $label)
+                            <li><a class="dropdown-item @if($locale === $code) active @endif" href="{{ url_to('admin.lang', $code) }}">{{ $label }}</a></li>
+                        @endforeach
+                    </ul>
                 </li>
                 <li class="nav-item dropdown">
                     <a href="#" class="header-profile" data-bs-toggle="dropdown" aria-expanded="false">
@@ -64,11 +74,11 @@
                             <span class="role-pill role-{{ $user->role }}">{{ $roles[$user->role] ?? $user->role }}</span>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_to('admin.profile') }}"><i class="bi bi-person"></i> マイプロフィール</a></li>
+                        <li><a class="dropdown-item" href="{{ url_to('admin.profile') }}"><i class="bi bi-person"></i> {{ lang('Admin.topbar.my_profile') }}</a></li>
                         <li>
                             <form method="post" action="{{ url_to('admin.logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> ログアウト</button>
+                                <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> {{ lang('Admin.topbar.logout') }}</button>
                             </form>
                         </li>
                     </ul>
@@ -92,14 +102,14 @@
         <div class="sidebar-wrapper">
             <nav>
                 <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" data-accordion="false">
-                    <li class="nav-header">メニュー</li>
+                    <li class="nav-header">{{ lang('Admin.nav.menu') }}</li>
                     <li class="nav-item">
                         <a href="{{ url_to('admin.dashboard') }}" @class(['nav-link', 'active' => url_is(admin_path())])>
-                            <i class="nav-icon bi bi-grid-fill"></i><p>ダッシュボード</p>
+                            <i class="nav-icon bi bi-grid-fill"></i><p>{{ lang('Admin.nav.dashboard') }}</p>
                         </a>
                     </li>
 
-                    <li class="nav-header">コンテンツ</li>
+                    <li class="nav-header">{{ lang('Admin.nav.content') }}</li>
                     @foreach($contentTypes as $ct)
                         <li class="nav-item">
                             <a href="{{ url_to('admin.entries', $ct->slug) }}" @class(['nav-link', 'active' => url_is(admin_path('content/' . $ct->slug)) || url_is(admin_path('content/' . $ct->slug . '/*'))])>
@@ -111,10 +121,10 @@
                         <li class="nav-item">
                             @if($isAdmin)
                                 <a href="{{ url_to('admin.types.create') }}" class="nav-link">
-                                    <i class="nav-icon bi bi-plus-circle"></i><p>コンテンツタイプを追加</p>
+                                    <i class="nav-icon bi bi-plus-circle"></i><p>{{ lang('Admin.nav.add_type') }}</p>
                                 </a>
                             @else
-                                <span class="nav-link"><i class="nav-icon bi bi-info-circle"></i><p>コンテンツはまだありません</p></span>
+                                <span class="nav-link"><i class="nav-icon bi bi-info-circle"></i><p>{{ lang('Admin.nav.no_content') }}</p></span>
                             @endif
                         </li>
                     @endif
@@ -123,50 +133,50 @@
                         <li class="nav-item">
                             <a href="{{ url_to('admin.inquiries') }}" @class(['nav-link', 'active' => url_is(admin_path('inquiries*'))])>
                                 <i class="nav-icon bi bi-inbox"></i>
-                                <p>お問い合わせ @if($unreadInquiries)<span class="nav-badge badge text-bg-danger ms-auto">{{ $unreadInquiries }}</span>@endif</p>
+                                <p>{{ lang('Admin.nav.inquiries') }} @if($unreadInquiries)<span class="nav-badge badge text-bg-danger ms-auto">{{ $unreadInquiries }}</span>@endif</p>
                             </a>
                         </li>
                     @endif
                     <li class="nav-item">
                         <a href="{{ url_to('admin.media') }}" @class(['nav-link', 'active' => url_is(admin_path('media*'))])>
-                            <i class="nav-icon bi bi-images"></i><p>メディア</p>
+                            <i class="nav-icon bi bi-images"></i><p>{{ lang('Admin.nav.media') }}</p>
                         </a>
                     </li>
 
                     @if($isAdmin)
                         @php $inSettings = url_is(admin_path('settings*')) || url_is(admin_path('branding')); @endphp
-                        <li class="nav-header">管理</li>
+                        <li class="nav-header">{{ lang('Admin.nav.management') }}</li>
                         <li @class(['nav-item', 'menu-open' => $inSettings])>
                             <a href="#" @class(['nav-link', 'active' => $inSettings])>
                                 <i class="nav-icon bi bi-gear-fill"></i>
-                                <p>設定 <i class="nav-arrow bi bi-chevron-right"></i></p>
+                                <p>{{ lang('Admin.nav.settings') }} <i class="nav-arrow bi bi-chevron-right"></i></p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ url_to('admin.settings') }}" @class(['nav-link', 'active' => url_is(admin_path('settings'))])><p>一般設定</p></a>
+                                    <a href="{{ url_to('admin.settings') }}" @class(['nav-link', 'active' => url_is(admin_path('settings'))])><p>{{ lang('Admin.nav.general') }}</p></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ url_to('admin.branding') }}" @class(['nav-link', 'active' => url_is(admin_path('branding'))])><p>ブランディング</p></a>
+                                    <a href="{{ url_to('admin.branding') }}" @class(['nav-link', 'active' => url_is(admin_path('branding'))])><p>{{ lang('Admin.nav.branding') }}</p></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ url_to('admin.users') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/users*'))])><p>ユーザー</p></a>
+                                    <a href="{{ url_to('admin.users') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/users*'))])><p>{{ lang('Admin.nav.users') }}</p></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ url_to('admin.types') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/content-types*'))])><p>コンテンツタイプ</p></a>
+                                    <a href="{{ url_to('admin.types') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/content-types*'))])><p>{{ lang('Admin.nav.content_types') }}</p></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ url_to('admin.activity') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/activity-log*'))])><p>操作ログ</p></a>
+                                    <a href="{{ url_to('admin.activity') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/activity-log*'))])><p>{{ lang('Admin.nav.activity') }}</p></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ url_to('admin.backup') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/backup*'))])><p>バックアップ</p></a>
+                                    <a href="{{ url_to('admin.backup') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/backup*'))])><p>{{ lang('Admin.nav.backup') }}</p></a>
                                 </li>
                             </ul>
                         </li>
                     @else
-                        <li class="nav-header">設定</li>
+                        <li class="nav-header">{{ lang('Admin.nav.settings') }}</li>
                         <li class="nav-item">
                             <a href="{{ url_to('admin.branding') }}" @class(['nav-link', 'active' => url_is(admin_path('branding'))])>
-                                <i class="nav-icon bi bi-palette-fill"></i><p>ブランディング</p>
+                                <i class="nav-icon bi bi-palette-fill"></i><p>{{ lang('Admin.nav.branding') }}</p>
                             </a>
                         </li>
                     @endif
@@ -218,7 +228,12 @@
 <script src="{{ base_url('assets/vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ base_url('assets/vendor/adminlte/adminlte.min.js') }}"></script>
 <script src="{{ base_url('assets/vendor/flatpickr/flatpickr.min.js') }}"></script>
-<script src="{{ base_url('assets/vendor/flatpickr/ja.js') }}"></script>
+@if($locale === 'ja')<script src="{{ base_url('assets/vendor/flatpickr/ja.js') }}"></script>@endif
+{{-- Admin UI translations for the JS below: sxt('key', ...args) with {0} {1} placeholders --}}
+<script>
+    window.SXL = {!! json_encode(lang('Admin.js'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!};
+    window.sxt = (key, ...args) => (window.SXL?.[key] ?? key).replace(/\{(\d+)\}/g, (_, i) => args[i] ?? '');
+</script>
 <script src="{{ base_url('assets/admin/datepicker.js') }}"></script>
 <script src="{{ base_url('assets/admin/tooltips.js') }}"></script>
 @stack('scripts')

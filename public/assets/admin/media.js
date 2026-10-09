@@ -17,8 +17,8 @@
         const response = await fetch(`${meta('upload-url')}?kind=${kind}`, {
             method: 'POST', body, headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' }
         });
-        const data = await response.json().catch(() => ({ error: { message: 'セッションの有効期限が切れた可能性があります。ページを再読み込みしてください。' } }));
-        if (!response.ok || data.error) throw new Error(data.error?.message || 'アップロードに失敗しました。');
+        const data = await response.json().catch(() => ({ error: { message: window.sxt('session_expired') } }));
+        if (!response.ok || data.error) throw new Error(data.error?.message || window.sxt('upload_failed'));
         return data;
     }
 
@@ -33,7 +33,7 @@
             const errors = [];
             let done = 0;
             for (const file of files) {
-                status.textContent = `アップロード中… ${done + 1} / ${files.length}`;
+                status.textContent = window.sxt('uploading_n', done + 1, files.length);
                 try { await upload(file, 'any'); done++; } catch (e) { errors.push(`${file.name}：${e.message}`); }
             }
             if (errors.length) {
@@ -65,11 +65,11 @@
                 ? `<img src="${escapeHtml(item.url)}" alt="">`
                 : `<div class="media-preview-file"><i class="bi bi-file-earmark-text"></i><span>${escapeHtml(item.path.split('.').pop().toUpperCase())}</span></div>`;
             m('mime').textContent = item.mime;
-            m('size').textContent = formatSize(item.size) + (item.width ? `（${item.width} × ${item.height}px）` : '');
+            m('size').textContent = formatSize(item.size) + (item.width ? ` (${item.width} × ${item.height}px)` : '');
             m('date').textContent = item.date;
             m('usages').innerHTML = usages.length
-                ? usages.map(u => `<span class="badge text-bg-warning me-1">${escapeHtml(u.label)}（${u.count}件）</span>`).join('')
-                : '<span class="text-secondary">使用されていません</span>';
+                ? usages.map(u => `<span class="badge text-bg-warning me-1">${escapeHtml(window.sxt('usage_count', u.label, u.count))}</span>`).join('')
+                : `<span class="text-secondary">${escapeHtml(window.sxt('not_used'))}</span>`;
             m('url').value = item.url;
             m('open').href = item.url;
             m('delete').action = meta('media-show-url').replace(/0$/, item.id);
@@ -77,19 +77,19 @@
         });
 
         m('delete').addEventListener('submit', e => {
-            const where = usages.map(u => `・${u.label}（${u.count}件）`).join('\n');
+            const where = usages.map(u => window.sxt('usage_line', u.label, u.count)).join('\n');
             const message = usages.length
-                ? `このファイルは次の場所で使用されています：\n${where}\n\n削除すると、そのページで画像・リンクが表示されなくなります。削除しますか？`
-                : 'このファイルを削除しますか？この操作は元に戻せません。';
+                ? window.sxt('del_used_confirm', where)
+                : window.sxt('del_file_confirm');
             if (!confirm(message)) e.preventDefault();
         });
 
         modalEl.querySelector('[data-copy]').addEventListener('click', async e => {
             await navigator.clipboard.writeText(m('url').value).catch(() => m('url').select());
-            e.currentTarget.innerHTML = '<i class="bi bi-check-lg"></i> コピーしました';
+            e.currentTarget.innerHTML = '<i class="bi bi-check-lg"></i> ' + window.sxt('copied');
         });
         modalEl.addEventListener('hidden.bs.modal', () => {
-            modalEl.querySelector('[data-copy]').innerHTML = '<i class="bi bi-clipboard"></i> コピー';
+            modalEl.querySelector('[data-copy]').innerHTML = '<i class="bi bi-clipboard"></i> ' + window.sxt('copy');
         });
     }
 
@@ -105,14 +105,14 @@
             <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header gap-3">
-                        <h5 class="modal-title text-nowrap">メディアから選択</h5>
-                        <input type="search" class="form-control form-control-sm" placeholder="ファイル名で検索" style="max-width: 260px">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+                        <h5 class="modal-title text-nowrap">${window.sxt('picker_title')}</h5>
+                        <input type="search" class="form-control form-control-sm" placeholder="${window.sxt('picker_search')}" style="max-width: 260px">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${window.sxt('picker_close')}"></button>
                     </div>
                     <div class="modal-body">
                         <div class="media-grid"></div>
-                        <p class="media-picker-empty text-center text-secondary py-5 mb-0" hidden>ファイルがありません。</p>
-                        <div class="text-center mt-3"><button type="button" class="btn btn-sm btn-outline-secondary media-picker-more" hidden>さらに読み込む</button></div>
+                        <p class="media-picker-empty text-center text-secondary py-5 mb-0" hidden>${window.sxt('picker_empty')}</p>
+                        <div class="text-center mt-3"><button type="button" class="btn btn-sm btn-outline-secondary media-picker-more" hidden>${window.sxt('picker_more')}</button></div>
                     </div>
                 </div>
             </div>`;

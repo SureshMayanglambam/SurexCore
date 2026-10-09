@@ -12,6 +12,20 @@ class Auth extends AdminController
      */
     private const MAX_ATTEMPTS = 5;
 
+    /**
+     * Switch the admin UI language (session only; no account change). Returns to the previous page.
+     */
+    public function setLocale(string $locale): RedirectResponse
+    {
+        if (array_key_exists($locale, self::LOCALES)) {
+            session()->set('admin_locale', $locale);
+        }
+
+        $back = previous_url();
+
+        return redirect()->to($back && str_contains($back, admin_path()) ? $back : (string) url_to('admin.dashboard'));
+    }
+
     public function login(): RedirectResponse|string
     {
         if (current_user() !== null) {
@@ -27,10 +41,7 @@ class Auth extends AdminController
         $key       = 'login-' . md5($this->request->getIPAddress());
 
         if (! $throttler->check($key, self::MAX_ATTEMPTS, MINUTE)) {
-            return redirect()->back()->with('error', sprintf(
-                'ログインの試行回数が多すぎます。%d秒後に再度お試しください。',
-                max(1, $throttler->getTokenTime()),
-            ));
+            return redirect()->back()->with('error', lang('Admin.login.throttled', [max(1, $throttler->getTokenTime())]));
         }
 
         // Login ID or email
@@ -42,7 +53,7 @@ class Auth extends AdminController
         if ($user === null) {
             log_activity('auth.failed', 'ログインに失敗しました（「' . mb_substr($login, 0, 100) . '」）');
 
-            return redirect()->back()->with('error', 'ログインID／メールアドレスまたはパスワードが正しくありません。')->with('old_login', $login);
+            return redirect()->back()->with('error', lang('Admin.login.failed'))->with('old_login', $login);
         }
 
         // New session ID on login prevents session fixation.
@@ -69,6 +80,6 @@ class Auth extends AdminController
         session()->remove('user_id');
         session()->regenerate(true);
 
-        return redirect()->route('admin.login')->with('success', 'ログアウトしました。');
+        return redirect()->route('admin.login')->with('success', lang('Admin.login.logged_out'));
     }
 }

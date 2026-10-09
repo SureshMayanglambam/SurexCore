@@ -109,11 +109,11 @@
             wrap.replaceChildren(...[
                 ...list.map((field, i) => renderField(field, list, i, depth, draw, reserved)),
                 list.length === 0 ? h('div', { class: 'fb-empty text-secondary border rounded mb-3 text-center' },
-                    icon('inboxes'), depth === 1 ? ' フィールドはまだありません' : ' サブフィールドはまだありません') : null,
+                    icon('inboxes'), depth === 1 ? ' ' + window.sxt('no_fields_1') : ' ' + window.sxt('no_fields_2')) : null,
                 h('button', {
                     type: 'button', class: 'btn btn-sm ' + (depth === 1 ? 'btn-primary' : 'btn-outline-primary'),
                     onclick: () => { list.push(newField()); draw(); changed(); }
-                }, icon('plus-lg'), depth === 1 ? ' フィールドを追加' : ' サブフィールドを追加')
+                }, icon('plus-lg'), depth === 1 ? ' ' + window.sxt('add_field') : ' ' + window.sxt('add_subfield'))
             ].filter(Boolean));
         };
 
@@ -124,19 +124,19 @@
     function renderField(field, list, index, depth, redrawList, reserved) {
         const typeLabel = () => (TYPES[field.type] || [field.type])[0];
         const head = {
-            label: h('span', { class: 'fb-label' }, field.label || '（ラベルなし）'),
+            label: h('span', { class: 'fb-label' }, field.label || window.sxt('no_label')),
             name: h('code', { class: 'fb-name ms-2 small' }, field.name),
             type: h('span', { class: 'badge fb-type ms-2' }, typeLabel()),
             required: h('span', { class: 'text-danger ms-1' }),
-            conditional: h('span', { class: 'badge text-bg-warning ms-2', 'data-bs-toggle': 'tooltip', title: '条件付き表示' }, icon('eye')),
-            listed: h('span', { class: 'badge text-bg-info ms-2', 'data-bs-toggle': 'tooltip', title: '一覧に表示' }, icon('table')),
+            conditional: h('span', { class: 'badge text-bg-warning ms-2', 'data-bs-toggle': 'tooltip', title: window.sxt('cond_show') }, icon('eye')),
+            listed: h('span', { class: 'badge text-bg-info ms-2', 'data-bs-toggle': 'tooltip', title: window.sxt('in_list') }, icon('table')),
         };
         const refreshHead = () => {
-            head.label.textContent = field.label || '（ラベルなし）';
+            head.label.textContent = field.label || window.sxt('no_label');
             head.name.textContent = field.name;
             head.type.textContent = typeLabel();
             head.required.textContent = field.required ? '*' : (field.required_if.length ? '*?' : '');
-            head.required.title = field.required_if.length ? '条件に一致したときだけ必須になります' : '';
+            head.required.title = field.required_if.length ? window.sxt('req_when_cond') : '';
             head.conditional.hidden = !field.conditions.length;
             head.listed.hidden = !(field.show_in_list && depth === 1 && !CONTAINERS.includes(field.type));
         };
@@ -163,20 +163,20 @@
                     onclick: openClose
                 }, head.label, head.required, head.name, head.type, head.conditional, head.listed),
                 h('div', { class: 'fb-tools d-flex gap-1' },
-                h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', 'data-bs-toggle': 'tooltip', title: '上へ移動',
+                h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', 'data-bs-toggle': 'tooltip', title: window.sxt('move_up'),
                     disabled: index === 0, onclick: () => move(-1) }, icon('arrow-up')),
-                h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', 'data-bs-toggle': 'tooltip', title: '下へ移動',
+                h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', 'data-bs-toggle': 'tooltip', title: window.sxt('move_down'),
                     disabled: index === list.length - 1, onclick: () => move(1) }, icon('arrow-down')),
-                h('button', { type: 'button', class: 'btn btn-sm btn-outline-danger', 'data-bs-toggle': 'tooltip', title: '削除',
+                h('button', { type: 'button', class: 'btn btn-sm btn-outline-danger', 'data-bs-toggle': 'tooltip', title: window.sxt('delete'),
                     onclick: () => {
-                        if (!confirm(`フィールド「${field.label || field.name || '無題'}」を削除しますか？\n保存すると、データベースのカラムと保存済みの値も削除されます。`)) return;
+                        if (!confirm(window.sxt('del_field_confirm', field.label || field.name || window.sxt('untitled')))) return;
                         list.splice(index, 1);
                         list.forEach(f => ['conditions', 'required_if'].forEach(p => {
                             f[p] = f[p].map(g => g.filter(r => r.field !== field.key)).filter(g => g.length);
                         }));
                         redrawList(); changed();
                     } }, icon('trash')),
-                h('button', { type: 'button', class: 'btn btn-sm btn-link text-secondary', 'data-bs-toggle': 'tooltip', title: '開く／閉じる',
+                h('button', { type: 'button', class: 'btn btn-sm btn-link text-secondary', 'data-bs-toggle': 'tooltip', title: window.sxt('toggle_open'),
                     onclick: openClose }, chevron))
             ),
             body
@@ -202,30 +202,30 @@
         const nameWarning = h('div', { class: 'form-text text-danger' });
         const checkName = () => {
             nameWarning.textContent = reserved.includes(field.name)
-                ? `「${field.name}」は使用できません（例：${field.name}_text）`
+                ? window.sxt('name_reserved', field.name)
                 : '';
         };
         const nameInput = input(field, 'name', {
-            class: 'form-control font-monospace', placeholder: '例：post_type_name', pattern: '[a-z][a-z0-9_]*',
+            class: 'form-control font-monospace', placeholder: window.sxt('name_ph'), pattern: '[a-z][a-z0-9_]*',
             after: () => { field._autoName = false; checkName(); refreshHead(); changed(); }
         });
         checkName();
 
         const rows = [
             h('div', { class: 'row g-3' },
-                h('div', { class: 'col-md-4' }, labelled('ラベル', input(field, 'label', {
-                    placeholder: '例：価格',
+                h('div', { class: 'col-md-4' }, labelled(window.sxt('label'), input(field, 'label', {
+                    placeholder: window.sxt('label_ph'),
                     after: () => {
                         if (field._autoName) { field.name = slugify(field.label); nameInput.value = field.name; checkName(); }
                         refreshHead(); changed();
                     }
                 }))),
-                h('div', { class: 'col-md-4' }, labelled('フィールド名', h('div', {}, nameInput, nameWarning), 'カラム名／コードで使う名前（半角英小文字・数字・_）')),
-                h('div', { class: 'col-md-4' }, labelled('フィールドタイプ', typeSelect))
+                h('div', { class: 'col-md-4' }, labelled(window.sxt('field_name'), h('div', {}, nameInput, nameWarning), window.sxt('field_name_help'))),
+                h('div', { class: 'col-md-4' }, labelled(window.sxt('field_type'), typeSelect))
             ),
             h('div', { class: 'row g-3 mt-0' },
-                h('div', { class: 'col-md-8' }, labelled('説明', input(field, 'instructions'), '投稿画面でフィールドの下に表示されます')),
-                h('div', { class: 'col-md-4' }, labelled('必須', h('select', {
+                h('div', { class: 'col-md-8' }, labelled(window.sxt('instructions'), input(field, 'instructions'), window.sxt('instructions_help'))),
+                h('div', { class: 'col-md-4' }, labelled(window.sxt('required'), h('select', {
                     class: 'form-select',
                     onchange: e => {
                         field.required = e.target.value === 'yes';
@@ -233,28 +233,28 @@
                         refreshHead(); redrawBody();
                     }
                 },
-                    h('option', { value: 'no', selected: !field.required && !field.required_if.length }, 'いいえ'),
-                    h('option', { value: 'yes', selected: field.required }, 'はい'),
-                    h('option', { value: 'if', selected: !field.required && field.required_if.length > 0 }, '条件付き'))))
+                    h('option', { value: 'no', selected: !field.required && !field.required_if.length }, window.sxt('req_no')),
+                    h('option', { value: 'yes', selected: field.required }, window.sxt('req_yes')),
+                    h('option', { value: 'if', selected: !field.required && field.required_if.length > 0 }, window.sxt('req_if')))))
             ),
         ];
 
         if (field.required_if.length) {
-            rows.push(renderRules(field, 'required_if', siblings, redrawBody, refreshHead, '必須にする条件'));
+            rows.push(renderRules(field, 'required_if', siblings, redrawBody, refreshHead, window.sxt('req_cond_title')));
         }
 
         const switches = h('div', { class: 'fb-switches' },
             // Top-level fields can be columns in the entry list.
             depth === 1 && !CONTAINERS.includes(field.type)
-                ? toggle(field.key + '_list', '一覧に表示', '投稿一覧に列として表示します', field.show_in_list,
+                ? toggle(field.key + '_list', window.sxt('in_list'), window.sxt('in_list_help'), field.show_in_list,
                     e => { field.show_in_list = e.target.checked; refreshHead(); })
                 : null,
-            toggle(field.key + '_cond', '条件付き表示', '条件に一致したときだけ、このフィールドを表示します', field.conditions.length > 0,
+            toggle(field.key + '_cond', window.sxt('cond_show'), window.sxt('cond_show_help'), field.conditions.length > 0,
                 e => { field.conditions = e.target.checked ? [[newRule()]] : []; refreshHead(); redrawBody(); }));
 
         const main = [h('div', {}, ...rows)];
         main.push(section(switches,
-            field.conditions.length ? renderRules(field, 'conditions', siblings, redrawBody, refreshHead, '表示する条件') : null));
+            field.conditions.length ? renderRules(field, 'conditions', siblings, redrawBody, refreshHead, window.sxt('show_cond_title')) : null));
 
         const options = [];
 
@@ -263,56 +263,56 @@
 
         if (['text', 'email', 'url', 'textarea', 'number'].includes(t)) {
             options.push(h('div', { class: 'row g-3' + (options.length ? ' mt-0' : '') },
-                col(t === 'textarea' ? 4 : 6, labelled('プレースホルダー', input(field, 'placeholder'))),
-                col(t === 'textarea' ? 6 : 6, labelled('初期値', input(field, 'default', t === 'number' ? { type: 'number', step: 'any' } : {}))),
-                t === 'textarea' ? col(2, labelled('行数', input(field, 'rows', { type: 'number', min: 2, max: 30, value: field.rows ?? 4 }))) : null
+                col(t === 'textarea' ? 4 : 6, labelled(window.sxt('placeholder'), input(field, 'placeholder'))),
+                col(t === 'textarea' ? 6 : 6, labelled(window.sxt('default'), input(field, 'default', t === 'number' ? { type: 'number', step: 'any' } : {}))),
+                t === 'textarea' ? col(2, labelled(window.sxt('rows'), input(field, 'rows', { type: 'number', min: 2, max: 30, value: field.rows ?? 4 }))) : null
             ));
         }
         if (t === 'number') {
             options.push(h('div', { class: 'row g-3' + (options.length ? ' mt-0' : '') },
-                col(4, labelled('最小値', input(field, 'min', { type: 'number', step: 'any' }))),
-                col(4, labelled('最大値', input(field, 'max', { type: 'number', step: 'any' }))),
-                col(4, labelled('刻み幅', input(field, 'step', { type: 'number', step: 'any', placeholder: '1' })))
+                col(4, labelled(window.sxt('min'), input(field, 'min', { type: 'number', step: 'any' }))),
+                col(4, labelled(window.sxt('max'), input(field, 'max', { type: 'number', step: 'any' }))),
+                col(4, labelled(window.sxt('step'), input(field, 'step', { type: 'number', step: 'any', placeholder: '1' })))
             ));
         }
         if (CHOICES.includes(t)) {
             options.push(h('div', { class: 'row g-3' + (options.length ? ' mt-0' : '') },
-                col(8, labelled('選択肢', h('textarea', {
-                    class: 'form-control font-monospace', rows: 4, placeholder: 'red : 赤\nblue : 青',
+                col(8, labelled(window.sxt('choices'), h('textarea', {
+                    class: 'form-control font-monospace', rows: 4, placeholder: window.sxt('choices_ph'),
                     oninput: e => field.choices = e.target.value
-                }, typeof field.choices === 'string' ? field.choices : ''), '1行に1つ。「値 : ラベル」または「値」のみ')),
-                col(4, labelled('初期値', input(field, 'default', { placeholder: '選択肢の値を入力' })))
+                }, typeof field.choices === 'string' ? field.choices : ''), window.sxt('choices_help'))),
+                col(4, labelled(window.sxt('default'), input(field, 'default', { placeholder: window.sxt('choice_default_ph') })))
             ));
         }
         if (t === 'toggle') {
             options.push(h('div', { class: 'form-check form-switch' },
                 h('input', { type: 'checkbox', class: 'form-check-input', id: field.key + '_def', checked: !!field.default,
                     onchange: e => field.default = e.target.checked }),
-                h('label', { class: 'form-check-label', for: field.key + '_def' }, '初期状態でオン')));
+                h('label', { class: 'form-check-label', for: field.key + '_def' }, window.sxt('toggle_on_default'))));
         }
         if (t === 'relation') {
             const typeSelect = h('select', { class: 'form-select', onchange: e => { field.related_type = e.target.value; } },
-                h('option', { value: '' }, '— コンテンツタイプを選択 —'),
+                h('option', { value: '' }, window.sxt('rel_select')),
                 ...Object.entries(CONTENT_TYPES).map(([slug, name]) =>
                     h('option', { value: slug, selected: field.related_type === slug }, `${name}（${slug}）`)));
             options.push(h('div', { class: 'row g-3 align-items-end' + (options.length ? ' mt-0' : '') },
-                col(6, labelled('関連付けるコンテンツタイプ', typeSelect, 'このコンテンツタイプの投稿から選択できます')),
-                col(6, h('div', { class: 'pb-2' }, toggle(field.key + '_multiple', '複数選択できる', 'オフ：1件だけ選択（セレクト）／オン：複数選択（チェックボックス）',
+                col(6, labelled(window.sxt('rel_type'), typeSelect, window.sxt('rel_type_help'))),
+                col(6, h('div', { class: 'pb-2' }, toggle(field.key + '_multiple', window.sxt('rel_multiple'), window.sxt('rel_multiple_help'),
                     !!field.multiple, e => { field.multiple = e.target.checked; })))
             ));
         }
         if (t === 'repeater') {
             options.push(h('div', { class: 'row g-3' + (options.length ? ' mt-0' : '') },
-                col(4, labelled('最小行数', input(field, 'min_rows', { type: 'number', min: 0, placeholder: '0' }))),
-                col(4, labelled('最大行数', input(field, 'max_rows', { type: 'number', min: 0, placeholder: '0 = 無制限' }))),
-                col(4, labelled('ボタンのラベル', input(field, 'button_label', { placeholder: '行を追加' })))
+                col(4, labelled(window.sxt('min_rows'), input(field, 'min_rows', { type: 'number', min: 0, placeholder: '0' }))),
+                col(4, labelled(window.sxt('max_rows'), input(field, 'max_rows', { type: 'number', min: 0, placeholder: window.sxt('max_rows_ph') }))),
+                col(4, labelled(window.sxt('button_label'), input(field, 'button_label', { placeholder: window.sxt('add_row') })))
             ));
         }
         if (options.length) main.push(section(...options));
         if (CONTAINERS.includes(t)) {
             main.push(h('div', { class: 'fb-sub' },
                 h('div', { class: 'small fw-semibold text-secondary mb-3' }, icon(t === 'group' ? 'collection' : 'list-ol'), ' ',
-                    t === 'group' ? 'このグループ内のフィールド' : '各行のフィールド'),
+                    t === 'group' ? window.sxt('group_fields') : window.sxt('repeater_fields')),
                 // Group fields share the parent table; repeater fields get their own row table.
                 renderList(field.sub_fields, depth + 1, t === 'repeater' ? RESERVED.row : reserved)));
         }
@@ -346,10 +346,10 @@
             h('div', { class: 'small fw-semibold mb-3' }, title));
 
         groups.forEach((group, gi) => {
-            if (gi > 0) box.append(h('div', { class: 'small fw-bold text-secondary text-uppercase my-1' }, 'または'));
+            if (gi > 0) box.append(h('div', { class: 'small fw-bold text-secondary text-uppercase my-1' }, window.sxt('cond_or')));
             const g = h('div', { class: 'd-flex flex-column gap-2' });
             group.forEach((rule, ri) => {
-                if (ri > 0) g.append(h('div', { class: 'small text-secondary ms-1' }, 'かつ'));
+                if (ri > 0) g.append(h('div', { class: 'small text-secondary ms-1' }, window.sxt('cond_and')));
                 g.append(renderRule(rule, () => {
                     group.splice(ri, 1);
                     if (!group.length) groups.splice(groups.indexOf(group), 1);
@@ -357,12 +357,12 @@
                 }, siblings, redraw));
             });
             g.append(h('div', {}, h('button', { type: 'button', class: 'btn btn-sm btn-link p-0',
-                onclick: () => { group.push(newRule()); redraw(); } }, '+ かつ')));
+                onclick: () => { group.push(newRule()); redraw(); } }, window.sxt('add_and'))));
             box.append(g);
         });
 
         box.append(h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary mt-2',
-            onclick: () => { groups.push([newRule()]); redraw(); } }, icon('plus'), ' または'));
+            onclick: () => { groups.push([newRule()]); redraw(); } }, icon('plus'), ' ' + window.sxt('cond_or')));
         return box;
     }
 
@@ -373,9 +373,9 @@
             onchange: e => { rule.field = e.target.value; rule.operator = operatorsFor(target())[0]; rule.value = ''; redraw(); } });
         const fillFields = () => {
             const options = siblings().map(f => h('option', { value: f.key, selected: f.key === rule.field },
-                `${f.label || '（ラベルなし）'}${f.name ? ' (' + f.name + ')' : ''}`));
-            if (rule.field && !target()) options.unshift(h('option', { value: rule.field, selected: true }, '（存在しないフィールド）'));
-            fieldSelect.replaceChildren(h('option', { value: '' }, '— フィールドを選択 —'), ...options);
+                `${f.label || window.sxt('no_label')}${f.name ? ' (' + f.name + ')' : ''}`));
+            if (rule.field && !target()) options.unshift(h('option', { value: rule.field, selected: true }, window.sxt('field_missing')));
+            fieldSelect.replaceChildren(h('option', { value: '' }, window.sxt('select_field')), ...options);
         };
         fillFields();
         fieldSelect.addEventListener('focus', fillFields);   // siblings may have been renamed/added meanwhile
@@ -387,21 +387,21 @@
         const opSelect = h('select', { class: 'form-select',
             onchange: e => { rule.operator = e.target.value; redraw(); } },
             ...ops.map(op => h('option', { value: op, selected: op === rule.operator },
-                t?.type === 'checkbox' ? { '==': 'チェックあり', '!=': 'チェックなし' }[op] ?? OPERATORS[op] : OPERATORS[op])));
+                t?.type === 'checkbox' ? { '==': window.sxt('checked'), '!=': window.sxt('unchecked') }[op] ?? OPERATORS[op] : OPERATORS[op])));
 
         let valueControl = null;
         if (!['empty', 'not_empty'].includes(rule.operator)) {
             if (t && ['select', 'radio', 'checkbox'].includes(t.type)) {
                 valueControl = h('select', { class: 'form-select', onchange: e => rule.value = e.target.value },
-                    h('option', { value: '' }, '— 値を選択 —'),
+                    h('option', { value: '' }, window.sxt('select_value')),
                     ...choicesOf(t).map(c => h('option', { value: c.value, selected: c.value === rule.value }, c.label)));
             } else if (t?.type === 'toggle') {
                 if (!['0', '1'].includes(rule.value)) rule.value = '1';
                 valueControl = h('select', { class: 'form-select', onchange: e => rule.value = e.target.value },
-                    h('option', { value: '1', selected: rule.value === '1' }, 'オン'),
-                    h('option', { value: '0', selected: rule.value === '0' }, 'オフ'));
+                    h('option', { value: '1', selected: rule.value === '1' }, window.sxt('on')),
+                    h('option', { value: '0', selected: rule.value === '0' }, window.sxt('off')));
             } else {
-                valueControl = input(rule, 'value', { type: t?.type === 'number' ? 'number' : 'text', step: 'any', placeholder: '値' });
+                valueControl = input(rule, 'value', { type: t?.type === 'number' ? 'number' : 'text', step: 'any', placeholder: window.sxt('value') });
             }
         }
 
@@ -409,7 +409,7 @@
             h('div', { style: 'flex: 2' }, fieldSelect),
             h('div', { style: 'flex: 1.4' }, opSelect),
             h('div', { style: 'flex: 2' }, valueControl),
-            h('button', { type: 'button', class: 'btn btn-outline-danger', 'data-bs-toggle': 'tooltip', title: '条件を削除', onclick: remove }, icon('x-lg')));
+            h('button', { type: 'button', class: 'btn btn-outline-danger', 'data-bs-toggle': 'tooltip', title: window.sxt('del_cond'), onclick: remove }, icon('x-lg')));
     }
 
     // ---------------------------------------------------------------- title field + submit
@@ -421,7 +421,7 @@
 
         titleSelect.replaceChildren(...(texts.length
             ? texts.map(f => h('option', { value: f.name, selected: f.name === current }, `${f.label || f.name} (${f.name})`))
-            : [h('option', { value: '' }, 'テキストフィールドがありません（投稿には連番のタイトルが付きます）')]));
+            : [h('option', { value: '' }, window.sxt('no_text_field'))]));
         titleSelect.dataset.selected = titleSelect.value;
     }
 
@@ -437,7 +437,7 @@
         (function collect(list) { list.forEach(f => { current.add(f.key); collect(f.sub_fields || []); }); })(state);
         const removed = [...savedKeys].filter(k => !current.has(k)).map(k => savedLabels[k] || k);
 
-        if (removed.length && !confirm(`次のフィールドを、すべての投稿に保存されたデータとともに削除します：\n\n• ${removed.join('\n• ')}\n\nこの操作は元に戻せません。続行しますか？`)) {
+        if (removed.length && !confirm(window.sxt('drop_fields_confirm', removed.join('\n• ')))) {
             e.preventDefault();
             return;
         }

@@ -44,9 +44,9 @@
 
     @case('toggle')
         @if($value)
-            <i class="bi bi-check-circle-fill text-success" title="はい" aria-label="はい"></i>
+            <i class="bi bi-check-circle-fill text-success" title="{{ lang('Admin.yes') }}" aria-label="{{ lang('Admin.yes') }}"></i>
         @else
-            <i class="bi bi-dash-circle text-secondary" title="いいえ" aria-label="いいえ"></i>
+            <i class="bi bi-dash-circle text-secondary" title="{{ lang('Admin.no') }}" aria-label="{{ lang('Admin.no') }}"></i>
         @endif
         @break
 

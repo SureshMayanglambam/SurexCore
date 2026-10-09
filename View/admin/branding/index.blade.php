@@ -1,33 +1,30 @@
 @extends('admin.layouts.app')
 
-@section('title', 'ブランディング')
-@section('subtitle', '管理画面のサイドバー上部に表示されるロゴです。')
+@section('title', lang('Admin.branding.title'))
+@section('subtitle', lang('Admin.branding.subtitle'))
 
 @section('content')
     <div class="row g-4">
         <div class="col-lg-7">
             <div class="card mb-0">
-                <div class="card-header"><h3 class="card-title">サイトロゴ</h3></div>
+                <div class="card-header"><h3 class="card-title">{{ lang('Admin.branding.site_logo') }}</h3></div>
                 <div class="card-body">
                     <form method="post" action="{{ url_to('admin.branding.update') }}" enctype="multipart/form-data">
                         @csrf
-                        <label class="form-label" for="logo">新しいロゴをアップロード</label>
+                        <label class="form-label" for="logo">{{ lang('Admin.branding.upload_new') }}</label>
                         <input id="logo" type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/webp,image/gif" required>
-                        <div class="form-text">
-                            PNG・JPG・WebP・GIF形式、最大2MBまで。サイドバーは暗い背景のため、背景が透明な白または明るい色のロゴ（PNG）がおすすめです。
-                            サイト名の左に、最大40 × 40pxの円形で表示されます（正方形の画像がおすすめです）。
-                        </div>
+                        <div class="form-text">{{ lang('Admin.branding.help') }}</div>
                         <div class="d-flex gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> ロゴをアップロード</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> {{ lang('Admin.branding.upload') }}</button>
                         </div>
                     </form>
 
                     @if($logo)
                         <hr class="my-4">
-                        <form method="post" action="{{ url_to('admin.branding.delete') }}" onsubmit="return confirm('ロゴを削除しますか？削除後はサイト名が表示されます。')">
+                        <form method="post" action="{{ url_to('admin.branding.delete') }}" onsubmit="return confirm('{{ lang('Admin.branding.confirm_del') }}')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> ロゴを削除</button>
+                            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> {{ lang('Admin.branding.delete') }}</button>
                         </form>
                     @endif
                 </div>
@@ -36,7 +33,7 @@
 
         <div class="col-lg-5">
             <div class="card mb-0">
-                <div class="card-header"><h3 class="card-title">プレビュー</h3></div>
+                <div class="card-header"><h3 class="card-title">{{ lang('Admin.branding.preview') }}</h3></div>
                 <div class="card-body">
                     <div class="logo-preview logo-preview-dark">
                         <span class="logo-fallback">
@@ -48,16 +45,16 @@
                             {{ $siteName }}
                         </span>
                     </div>
-                    <div class="form-text mb-3">サイドバー</div>
+                    <div class="form-text mb-3">{{ lang('Admin.branding.sidebar') }}</div>
 
                     <div class="logo-preview logo-preview-light">
                         @if($logo)
                             <img src="{{ media_url($logo) }}" alt="{{ $siteName }}">
                         @else
-                            <span class="text-secondary">ロゴはアップロードされていません</span>
+                            <span class="text-secondary">{{ lang('Admin.branding.no_logo') }}</span>
                         @endif
                     </div>
-                    <div class="form-text">明るい背景での表示（Webサイトなど）: <code>media_url(setting('site_logo'))</code></div>
+                    <div class="form-text">{{ lang('Admin.branding.light_bg') }} <code>media_url(setting('site_logo'))</code></div>
                 </div>
             </div>
         </div>
