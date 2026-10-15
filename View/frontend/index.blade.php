@@ -15,6 +15,7 @@
 
     <section class="hero">
         <div class="container">
+            <img class="hero__logo" src="{{ asset('assets/brand/surexcore-logo-dark.png') }}" alt="SurexCore" width="223" height="56">
             <span class="hero__badge">v{{ $cms['version'] }} · Developer Preview</span>
             <h1 class="hero__title">Welcome to <span>{{ $site->name }}</span></h1>
             <p class="hero__lead">
@@ -22,7 +23,7 @@
                 Build content types in the admin panel, and write the website in plain Blade — like Laravel, without the weight.
             </p>
             <div class="hero__actions">
-                <a class="btn btn-primary" href="{{ $adminUrl }}"><i class="bi bi-box-arrow-in-right"></i> 管理画面へログイン</a>
+                <a class="btn btn-primary" href="{{ $adminUrl }}"><i class="bi bi-box-arrow-in-right"></i> Log in to the admin</a>
                 <a class="btn btn-outline" href="{{ url_to('news') }}"><i class="bi bi-newspaper"></i> Sample page</a>
             </div>
             <p class="hero__meta">Developed by {{ $cms['developer'] }}</p>
@@ -63,12 +64,12 @@
                 <div class="feature">
                     <div class="feature__icon"><i class="bi bi-shield-check"></i></div>
                     <h3>Secure by default</h3>
-                    <p>CSRF, login rate limiting, a hidden admin URL, roles (管理者 / Web管理者), an activity log and automatic migrations.</p>
+                    <p>CSRF, login rate limiting, a hidden admin URL, roles (Administrator / Web admin), an activity log and automatic migrations.</p>
                 </div>
                 <div class="feature">
                     <div class="feature__icon"><i class="bi bi-envelope"></i></div>
                     <h3>Forms &amp; mail</h3>
-                    <p>A contact form with 入力 → 確認 → 完了, Laravel-style validation and plain-text mail templates.</p>
+                    <p>A contact form with input → confirm → done steps, Laravel-style validation and plain-text mail templates.</p>
                 </div>
                 <div class="feature">
                     <div class="feature__icon"><i class="bi bi-search"></i></div>
@@ -100,7 +101,7 @@
                 <li>
                     <div>
                         <h3>Create a content type</h3>
-                        <p>設定 → コンテンツタイプ. Try the sample: name <code>お知らせ</code>, slug <code>news</code>, fields <code>headline</code> (テキスト) and <code>body</code> (本文 / CKEditor).
+                        <p>Settings → Content types. Try the sample: name <code>News</code>, slug <code>news</code>, fields <code>headline</code> (Text) and <code>body</code> (Rich text / CKEditor).
                             Then open <a href="{{ url_to('news') }}">/news</a>.</p>
                     </div>
                 </li>

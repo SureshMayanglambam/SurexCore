@@ -30,6 +30,7 @@
 
 .sx-welcome .hero { background: radial-gradient(1200px 500px at 85% -10%, rgba(180,241,5,.22), transparent 60%), var(--brand);
     color: #fff; padding: 110px 0 100px; }
+.sx-welcome .hero__logo { display: block; height: 56px; width: auto; margin-bottom: 1.75rem; }
 .sx-welcome .hero__badge { display: inline-block; padding: .25em .9em; border: 1px solid rgba(255,255,255,.3); border-radius: 999px;
     font-size: .8rem; letter-spacing: .08em; margin-bottom: 1.2rem; }
 .sx-welcome .hero__title { font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 800; letter-spacing: -.02em; color: #fff; }

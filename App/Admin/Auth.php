@@ -2,6 +2,7 @@
 
 namespace App\Admin;
 
+use App\Libraries\LoginGuard;
 use App\Model\UserModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -48,17 +49,31 @@ class Auth extends AdminController
         $login    = trim((string) $this->request->getPost('login'));
         $password = (string) $this->request->getPost('password');
         $users    = model(UserModel::class);
-        $user     = $login !== '' && $password !== '' ? $users->attempt($login, $password) : null;
+        $guard    = new LoginGuard();
+
+        // Too many failures for this login ID (from any IP): don't even check the password.
+        if (($wait = $guard->lockedFor($login)) > 0) {
+            return redirect()->back()->with('error', lang('Admin.login.locked', [(int) ceil($wait / MINUTE)]))->with('old_login', $login);
+        }
+
+        $user = $login !== '' && $password !== '' ? $users->attempt($login, $password) : null;
 
         if ($user === null) {
             log_activity('auth.failed', 'ログインに失敗しました（「' . mb_substr($login, 0, 100) . '」）');
+            if ($login !== '') {
+                $guard->failed($login, $this->request->getIPAddress(), (string) $this->request->getUserAgent());
+            }
 
             return redirect()->back()->with('error', lang('Admin.login.failed'))->with('old_login', $login);
         }
 
+        $guard->succeeded($login, $this->request->getIPAddress());
+
         // New session ID on login prevents session fixation.
         session()->regenerate(true);
         session()->set('user_id', $user->id);
+        // Re-read: attempt() may have rehashed the password. Changing it later ends this session.
+        session()->set('auth_fp', UserModel::fingerprint($users->find($user->id)));
         $users->update($user->id, ['last_login_at' => date('Y-m-d H:i:s')]);
         log_activity('auth.login', 'ログインしました', 'user', (int) $user->id, $user);
 
@@ -77,7 +92,7 @@ class Auth extends AdminController
     {
         log_activity('auth.logout', 'ログアウトしました', 'user', (int) current_user()->id);
 
-        session()->remove('user_id');
+        session()->remove(['user_id', 'auth_fp']);
         session()->regenerate(true);
 
         return redirect()->route('admin.login')->with('success', lang('Admin.login.logged_out'));

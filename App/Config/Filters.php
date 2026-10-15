@@ -40,6 +40,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'installed'     => InstallCheck::class,
         'auth'          => AdminAuth::class,
+        'ipblock'       => \App\Filters\IpBlock::class,
         'dbupgrade'     => DbUpgrade::class,
         'maintenance'   => Maintenance::class,
     ];

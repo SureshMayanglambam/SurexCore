@@ -46,6 +46,15 @@ class UserModel extends Model
         return $user;
     }
 
+    /**
+     * Kept in the session at login; it changes with the password, so a password change ends
+     * every other session of that user (see current_user()).
+     */
+    public static function fingerprint(object $user): string
+    {
+        return hash_hmac('sha256', $user->id . '|' . $user->password, (string) config('Encryption')->key);
+    }
+
     public function countActiveAdmins(): int
     {
         return $this->where('role', 'admin')->where('status', 'active')->countAllResults();

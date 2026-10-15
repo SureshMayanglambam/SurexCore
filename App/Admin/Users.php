@@ -55,6 +55,11 @@ class Users extends AdminController
         }
 
         model(UserModel::class)->update($item->id, $data);
+        if (isset($data['password']) && (int) $item->id === (int) current_user()->id) {
+            // Own password changed here: stay logged in; other sessions of this account end.
+            session()->regenerate(true);
+            session()->set('auth_fp', UserModel::fingerprint(model(UserModel::class)->find($item->id)));
+        }
         log_activity(
             'user.updated',
             "ユーザー「{$data['name']}」を更新しました" . (isset($data['password']) ? '（パスワードを変更）' : ''),

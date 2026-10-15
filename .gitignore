@@ -135,3 +135,5 @@ writable/installed.lock
 # SurexCore: local build output and backups
 /deploy/
 /writable/backups/
+# Per-server IP block / allow lists (Settings → Security)
+/writable/security/

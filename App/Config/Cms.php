@@ -20,7 +20,7 @@ class Cms extends BaseConfig
     /**
      * CMS version shown in the admin footer.
      */
-    public string $version = '0.1.4';
+    public string $version = '0.1.5';
 
     /**
      * Product name and developer credit (welcome page). Constants: only changeable here in the code.
@@ -43,6 +43,26 @@ class Cms extends BaseConfig
      * Where site notifications go, e.g. contact form mail (.env: cms.adminEmail).
      */
     public string $adminEmail = '';
+
+    /**
+     * Failed logins for one login ID (from any IP) before the admins get an alert email.
+     * 0 = never (.env: cms.loginAlertAfter).
+     */
+    public int $loginAlertAfter = 3;
+
+    /**
+     * Failed logins for one login ID before it is locked for $loginLockMinutes (from any IP).
+     * 0 = never lock (.env: cms.loginLockAfter, cms.loginLockMinutes).
+     */
+    public int $loginLockAfter   = 10;
+    public int $loginLockMinutes = 15;
+
+    /**
+     * Failed logins from one IP (within $loginLockMinutes of each other) before that IP is blocked from
+     * the admin panel until it is removed from the list: Settings → Security, or
+     * writable/security/blocked-ips.txt. 0 = never block (.env: cms.ipBlockAfter).
+     */
+    public int $ipBlockAfter = 3;
 
     /**
      * Template the installer fills in to create .env.

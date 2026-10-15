@@ -19,10 +19,12 @@ use App\Admin\Entries;
 use App\Admin\Inquiries;
 use App\Admin\Media;
 use App\Admin\Profile;
+use App\Admin\Security;
 use App\Admin\Settings;
 use App\Admin\Users;
 
-$routes->group(config('Cms')->adminPath, ['filter' => 'dbupgrade'], static function ($routes) {
+// ipblock first: IPs on writable/security/blocked-ips.txt get 403 on every admin page, login included.
+$routes->group(config('Cms')->adminPath, ['filter' => ['ipblock', 'dbupgrade']], static function ($routes) {
     $routes->get('login', [Auth::class, 'login'], ['as' => 'admin.login']);
     $routes->post('login', [Auth::class, 'attempt'], ['as' => 'admin.login.attempt']);
 
@@ -96,6 +98,11 @@ $routes->group(config('Cms')->adminPath, ['filter' => 'dbupgrade'], static funct
         $routes->delete('content-types/(:num)', [ContentTypes::class, 'delete'], ['as' => 'admin.types.delete']);
 
         $routes->get('activity-log', [ActivityLog::class, 'index'], ['as' => 'admin.activity']);
+
+        // Security: IPs blocked from the admin after failed logins, and the allow list
+        $routes->get('security', [Security::class, 'index'], ['as' => 'admin.security']);
+        $routes->post('security/unblock', [Security::class, 'unblock'], ['as' => 'admin.security.unblock']);
+        $routes->put('security/allowed', [Security::class, 'updateAllowed'], ['as' => 'admin.security.allowed']);
 
         // バックアップ: download the database (+ uploads)
         $routes->get('backup', [Backup::class, 'index'], ['as' => 'admin.backup']);

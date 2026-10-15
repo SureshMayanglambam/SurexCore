@@ -48,6 +48,11 @@ if (! function_exists('current_user')) {
         if ($user === false) {
             $id   = session('user_id');
             $user = $id ? model(App\Model\UserModel::class)->findActive((int) $id) : null;
+
+            // Password changed since this session logged in (or a session from before this check): log out.
+            if ($user !== null && ! hash_equals(App\Model\UserModel::fingerprint($user), (string) session('auth_fp'))) {
+                $user = null;
+            }
         }
 
         return $user;

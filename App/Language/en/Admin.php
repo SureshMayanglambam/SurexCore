@@ -72,6 +72,7 @@ return [
         'content_types' => 'Content types',
         'activity'      => 'Activity log',
         'backup'        => 'Backup',
+        'security'      => 'Security',
     ],
 
     // ---- login ----
@@ -83,6 +84,7 @@ return [
         'submit'       => 'Sign in',
         'failed'       => 'The login ID / email or password is incorrect.',
         'throttled'    => 'Too many login attempts. Please try again in {0} seconds.',
+        'locked'       => 'Too many failed attempts for this login ID. Please try again in {0} minutes.',
         'logged_out'   => 'You have been logged out.',
     ],
 
@@ -385,7 +387,56 @@ return [
     ],
 
     // ---- roles (display labels) ----
+    'ipblock' => [
+        'title'  => 'Access denied',
+        'body'   => 'Your IP address has been blocked from the admin panel after repeated failed logins. Please contact the site administrator.',
+    ],
+
+    'security' => [
+        'title'             => 'Security',
+        'subtitle'          => 'IP addresses blocked from the admin panel after failed logins',
+        'blocked_title'     => 'Blocked IP addresses',
+        'ip'                => 'IP address',
+        'note'              => 'Note',
+        'unblock'           => 'Unblock',
+        'confirm_unblock'   => 'Unblock {0}? It will be able to open the admin login page again.',
+        'none_blocked'      => 'No IP addresses are blocked.',
+        'blocked_help'      => 'Blocked IPs get “Access denied” on every admin page (the website stays open to them) until they are unblocked here. If every admin is locked out, delete the line from {0} on the server.',
+        'allowed_title'     => 'Allowed IP addresses',
+        'allowed_help'      => 'These IPs are never blocked, however many logins fail — add your office or home so a few typos can\'t lock you out.',
+        'your_ip'           => 'Your IP address:',
+        'on_allow_list'     => 'on the allow list',
+        'add_my_ip'         => 'Add my IP',
+        'allowed_format'    => 'One IP per line (IPv4 or IPv6); text after # is a note. Stored in {0}.',
+        'rules_title'       => 'Rules',
+        'rule_ip_block'     => 'An IP is blocked after {0} failed logins (each within {1} minutes of the last).',
+        'rule_ip_block_off' => 'Blocking IPs is off.',
+        'rule_alert'        => 'The admins get an email after {0} failed logins for one login ID.',
+        'rule_alert_off'    => 'Failed-login emails are off.',
+        'rule_lock'         => 'A login ID is locked for {1} minutes after {0} failed logins (from any IP).',
+        'rule_lock_off'     => 'Locking login IDs is off.',
+        'rules_env'         => 'Change these numbers in .env: {0} (0 = off).',
+        'unblocked'         => 'Unblocked {0}.',
+        'allowed_saved'     => 'Saved the allowed IP addresses.',
+        'invalid_ips'       => 'These are not valid IP addresses: {0}',
+        'save_failed'       => 'Could not save. Check that writable/security/ can be written by the web server.',
+    ],
+
+    'no_permission' => 'You don\'t have permission to open that page.',
+
     'mail' => [
+        'login_alert_subject'  => '[{0}] Failed login attempts',
+        'login_lock_subject'   => '[{0}] Login locked after repeated failures',
+        'login_alert_intro'    => 'There were {0} failed sign-in attempts in a row for the login ID below (counted within {1} minutes of each other).',
+        'login_lock_intro'     => 'After {0} failed sign-in attempts, the login ID below is now locked for {1} minutes.',
+        'login_lbl_login'      => 'Login ID / email tried',
+        'login_lbl_ip'         => 'IP address',
+        'login_lbl_time'       => 'Time',
+        'login_lbl_browser'    => 'Browser',
+        'login_advice'         => 'If this was you, no action is needed. If not, consider changing the password and check the activity log:',
+        'login_block_subject'  => '[{0}] IP address blocked from the admin panel',
+        'login_block_intro'    => 'After {0} failed sign-in attempts, the IP address below is now blocked from the admin panel.',
+        'login_block_advice'   => 'It stays blocked until you unblock it: Settings → Security in the admin panel, or delete its line from writable/security/blocked-ips.txt on the server. If this was you or a colleague, unblock it here:',
         'test_subject' => 'Test email ({0})',
         'test_body'    => '<p>This is a test email sent from the admin area of <strong>{0}</strong>.</p>'
             . '<p>If you received it, the SMTP settings in .env are working.</p>'

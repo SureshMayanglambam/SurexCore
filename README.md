@@ -1,17 +1,16 @@
-```
-  ____                               ____
- / ___|  _   _  _ __   ___ __  __   / ___|  ___   _ __   ___
- \___ \ | | | || '__| / _ \\ \/ /  | |     / _ \ | '__| / _ \
-  ___) || |_| || |   |  __/ >  <   | |___ | (_) || |   |  __/
- |____/  \__,_||_|    \___|/_/\_\   \____| \___/ |_|    \___|
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/assets/brand/surexcore-logo-dark.png">
+    <img src="public/assets/brand/surexcore-logo.png" alt="SurexCore" width="420">
+  </picture>
+</p>
 
 # SurexCore
 
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.4 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.1.5 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -546,6 +545,7 @@ SurexCore is built to be safe to run on shared hosting out of the box:
 - **CSRF protection** on every form, plus automatic output escaping to prevent cross-site scripting (XSS).
 - **Secure sessions & cookies** — HttpOnly, SameSite and Secure-on-HTTPS cookies, a neutral session name, and the old session destroyed on login.
 - **Safe passwords & login** — modern password hashing, a minimum length, login rate limiting, and generic error messages that don't reveal whether an account exists.
+- **Brute-force protection** — an IP that fails to log in 3 times is blocked from the admin panel until an admin unblocks it (Settings → Security, with an allow list for your own IPs); the admins get an email, login IDs under attack from many IPs are locked for a while, and changing a password signs out every other session of that account.
 - **Hidden admin URL**, the installer locked after setup, and errors hidden in production.
 - **Sanitized rich text** — editor HTML is cleaned on save (no scripts, iframes, event handlers or dangerous links).
 - **Safe uploads** — the file type is detected from the contents (not the name), files get random names, and images are re-encoded to strip metadata (EXIF/GPS) and hidden payloads.

@@ -33,7 +33,8 @@
     <meta name="twitter:image" content="@yield('og_image', asset('assets/frontend/images/ogp.jpg'))">
 
     {{-- Favicon --}}
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
     {{--Font--}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

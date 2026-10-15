@@ -51,6 +51,11 @@ class Profile extends AdminController
         }
 
         model(UserModel::class)->update($user->id, $data);
+        if (isset($data['password'])) {
+            // Stay logged in here; every other session of this account ends (see current_user()).
+            session()->regenerate(true);
+            session()->set('auth_fp', UserModel::fingerprint(model(UserModel::class)->find($user->id)));
+        }
         log_activity('user.profile', '自分のプロフィールを更新しました' . (isset($data['password']) ? '（パスワード変更あり）' : ''), 'user', (int) $user->id);
 
         return redirect()->route('admin.profile')->with('success', lang('Admin.flash.profile_updated'));

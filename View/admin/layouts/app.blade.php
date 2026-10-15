@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title') | {{ $siteName }} {{ lang('Admin.site_admin') }}</title>
+    <link rel="icon" href="{{ base_url('favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ base_url('apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/adminlte/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/flatpickr/flatpickr.min.css') }}">
@@ -94,7 +96,7 @@
                 @if($siteLogo)
                     <img src="{{ media_url($siteLogo) }}" alt="" class="brand-logo">
                 @else
-                    <i class="bi bi-asterisk brand-icon"></i>
+                    <img src="{{ base_url('assets/brand/surexcore-mark.png') }}" alt="" class="brand-mark" width="34" height="34">
                 @endif
                 <span class="brand-text">{{ $siteName }}</span>
             </a>
@@ -168,6 +170,9 @@
                                     <a href="{{ url_to('admin.activity') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/activity-log*'))])><p>{{ lang('Admin.nav.activity') }}</p></a>
                                 </li>
                                 <li class="nav-item">
+                                    <a href="{{ url_to('admin.security') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/security*'))])><p>{{ lang('Admin.nav.security') }}</p></a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="{{ url_to('admin.backup') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/backup*'))])><p>{{ lang('Admin.nav.backup') }}</p></a>
                                 </li>
                             </ul>
@@ -218,7 +223,7 @@
 
     <footer class="app-footer">
         <div class="footer-left">
-            <span class="footer-logo"><i class="bi bi-asterisk"></i> {{ \Config\Cms::NAME }} {{ $version }}</span>
+            <span class="footer-logo"><img src="{{ base_url('assets/brand/surexcore-mark.png') }}" alt="" width="16" height="16"> {{ \Config\Cms::NAME }} {{ $version }}</span>
             <span class="footer-separator">|</span>
             <span class="footer-copy">&copy; {{ date('Y') }} {{ $siteName }}</span>
         </div>

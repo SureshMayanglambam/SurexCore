@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title') | {{ config('Cms')->appName }}</title>
+    <link rel="icon" href="{{ base_url('favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ base_url('apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ base_url('assets/vendor/adminlte/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ base_url('assets/admin/theme.css') }}">
@@ -14,7 +16,12 @@
     <div class="login-box @yield('box-class')">
         <div class="card">
             <div class="card-header">
-                <span class="login-brand"><i class="bi bi-asterisk"></i> {{ config('Cms')->appName }}</span>
+                @if(config('Cms')->appName === \Config\Cms::NAME)
+                    <img src="{{ base_url('assets/brand/surexcore-logo.png') }}" alt="{{ \Config\Cms::NAME }}" class="login-logo" width="183" height="46">
+                @else
+                    {{-- Renamed CMS (cms.appName): show that name instead of the SurexCore logo --}}
+                    <span class="login-brand"><i class="bi bi-asterisk"></i> {{ config('Cms')->appName }}</span>
+                @endif
             </div>
             <div class="card-body login-card-body">
                 @yield('content')

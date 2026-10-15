@@ -82,6 +82,7 @@ if [[ "$MODE" == "full" ]]; then
 # (A new encryption key was generated for this site. Keep this file private.)
 
 CI_ENVIRONMENT = production
+#CI_ENVIRONMENT = development
 
 app.baseURL = 'https://●●example.com/'
 app.appTimezone = 'Asia/Tokyo'

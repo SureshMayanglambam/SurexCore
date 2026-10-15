@@ -110,6 +110,8 @@ a:hover { color: var(--forest-700); text-decoration: none; }
 .app-sidebar .brand-link { display: flex; align-items: center; gap: .7rem; padding: 0; color: #fff; text-decoration: none; }
 .app-sidebar .brand-icon { color: var(--lime); font-size: 1.45rem; transition: transform .3s ease; }
 .app-sidebar .brand-link:hover .brand-icon { transform: rotate(90deg); }
+.app-sidebar .brand-mark { flex: 0 0 34px; width: 34px; height: 34px; transition: transform .3s ease; }
+.app-sidebar .brand-link:hover .brand-mark { transform: scale(1.08); }
 .app-sidebar .brand-text { font-size: 1.2rem; font-weight: 700; letter-spacing: -.02em; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .app-sidebar .sidebar-wrapper { flex: 1; padding: 0 1.25rem 1rem; }
@@ -435,6 +437,7 @@ a:hover { color: var(--forest-700); text-decoration: none; }
 .login-box .login-card-body { padding: 1rem 2.5rem 2.25rem !important; border-radius: 0 0 var(--r-xxl) var(--r-xxl); }
 .login-brand { display: inline-flex; align-items: center; gap: .6rem; font-size: 1.55rem; font-weight: 800; letter-spacing: -.035em; color: var(--forest-900); }
 .login-brand i { color: var(--forest-900); }
+.login-logo { display: block; height: 46px; width: auto; }
 .login-box-msg { color: var(--muted); padding: 0 0 1.25rem; }
 .login-box .form-floating > .form-control { border-radius: var(--r-lg); background: #F7F9F8; }
 .login-box .input-group-text { border-radius: 0 var(--r-lg) var(--r-lg) 0; background: #F7F9F8; }
@@ -591,3 +594,5 @@ a:hover { color: var(--forest-700); text-decoration: none; }
 .hero-dropdown { position: relative; z-index: 2; display: inline-block; }
 button.hero-link { background: none; border: 0; padding: 0; }
 .hero-dropdown .dropdown-menu { margin-top: .5rem !important; }
+
+.footer-logo img { width: 16px; height: 16px; vertical-align: -3px; }

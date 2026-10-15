@@ -104,6 +104,7 @@ class DeployPackage
             '# A new encryption key was generated for this site. Keep this file private.',
             '',
             'CI_ENVIRONMENT = production',
+            '#CI_ENVIRONMENT = development',
             '',
             "app.baseURL = 'https://●●/'",
             "app.appTimezone = '" . config('App')->appTimezone . "'",
