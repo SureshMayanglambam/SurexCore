@@ -20,7 +20,7 @@ class Cms extends BaseConfig
     /**
      * CMS version shown in the admin footer.
      */
-    public string $version = '0.1.5';
+    public string $version = '0.1.6';
 
     /**
      * Product name and developer credit (welcome page). Constants: only changeable here in the code.
@@ -65,6 +65,15 @@ class Cms extends BaseConfig
     public int $ipBlockAfter = 3;
 
     /**
+     * Images uploaded in the admin (media, image fields, editor, logo) are saved as WebP:
+     * JPEG as lossy WebP at $webpQuality, PNG as lossless WebP (transparency kept).
+     * A file is only converted when the WebP is smaller; GIFs stay GIF (animation).
+     * (.env: cms.convertToWebp = false to keep the original formats.)
+     */
+    public bool $convertToWebp = true;
+    public int $webpQuality    = 82;
+
+    /**
      * Template the installer fills in to create .env.
      */
     public string $envTemplate = ROOTPATH . '.env.example';
@@ -98,7 +107,7 @@ class Cms extends BaseConfig
     /**
      * URL segments a content type slug may not use (they would clash with built-in routes).
      */
-    public array $reservedSlugs = ['admin', 'install', 'assets', 'api', 'index'];
+    public array $reservedSlugs = ['admin', 'install', 'assets', 'api', 'index', 'branding', 'uploads'];
 
     public function __construct()
     {

@@ -152,8 +152,8 @@ class Media extends AdminController
         }
 
         $file->move(FCPATH . $dir, $name);
-        // Images: strip metadata (GPS location, ...) and anything hidden in the file.
-        (new \App\Libraries\ImageCleaner())->clean(FCPATH . $dir . '/' . $name, $mime);
+        // Images: strip metadata (GPS location, ...) and anything hidden in the file; JPEG/PNG become WebP.
+        $name = basename((new \App\Libraries\ImageCleaner())->clean(FCPATH . $dir . '/' . $name, $mime));
         $path = $dir . '/' . $name;
         $id   = model(MediaModel::class)->register($path, $file->getClientName(), (int) current_user()->id);
 
@@ -164,7 +164,7 @@ class Media extends AdminController
             'url'  => base_url($path),
             'path' => $path,
             'name' => $file->getClientName(),
-            'size' => $file->getSize(),
+            'size' => (int) filesize(FCPATH . $path),
         ]);
     }
 

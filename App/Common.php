@@ -132,6 +132,11 @@ if (! function_exists('media_url')) {
      */
     function media_url(?string $path): string
     {
+        // An SVG logo is never served straight from uploads/ (it could contain scripts): use its safe route.
+        if ($path && preg_match('#^uploads/branding/(logo-[a-f0-9]{12}\.svg)$#', $path, $m)) {
+            return base_url('branding/' . $m[1]);
+        }
+
         return $path ? base_url($path) : '';
     }
 }

@@ -21,6 +21,23 @@ textarea.text-mono { min-height: 360px; }
 .fld-upload-preview { max-height: 80px; max-width: 160px; object-fit: cover; }
 a.fld-upload-preview { max-width: 60%; }
 .fld-row .card-body > .fld:last-child { margin-bottom: 1rem !important; }
+
+/* Repeater rows and groups: a tinted box with an accent edge shows which fields belong together.
+   Nested levels alternate tint / white so each level stays readable. */
+.card .fld-row { border: 1px solid #DCE7E0 !important; border-left: 3px solid #A9D46B !important; border-radius: var(--r-md, 10px) !important; overflow: hidden; }
+.card .fld-row > .card-header.fld-row-head { background: #EDF4EF !important; border-bottom: 1px solid #DCE7E0 !important; border-radius: 0 !important; }
+.fld-row-body { background: #F6FAF7; }
+.fld-row.is-collapsed > .fld-row-body { display: none; }
+.card .fld-row.is-collapsed > .card-header.fld-row-head { border-bottom: 0 !important; }
+.fld-row-toggle { background: none; border: 0; padding: .25rem .25rem; min-width: 0; color: inherit; cursor: pointer; }
+.fld-row-toggle:focus-visible { outline: 2px solid var(--forest-800, #072F1F); outline-offset: 2px; border-radius: 6px; }
+.fld-row-chevron { transition: transform .2s ease; font-size: .8rem; }
+.fld-row.is-collapsed .fld-row-chevron { transform: rotate(-90deg); }
+.fld-row-summary { min-width: 0; }
+.fld-group-box { border: 1px solid #DCE7E0; border-left: 3px solid #8FBFA3; border-radius: var(--r-md, 10px); padding: 1rem 1rem .25rem; background: #F6FAF7; }
+.fld-row-body .fld-row-body, .fld-row-body .fld-group-box, .fld-group-box .fld-group-box, .fld-group-box .fld-row-body { background: #fff; }
+.fld-row-body .fld-row-body .fld-row-body, .fld-row-body .fld-row-body .fld-group-box,
+.fld-group-box .fld-group-box .fld-group-box, .fld-group-box .fld-row-body .fld-row-body { background: #F6FAF7; }
 .fld-row .ck-editor__editable_inline, .fld-type-group .ck-editor__editable_inline { min-height: 160px; }
 
 /* Entry list: image fields shown as a column */

@@ -12,7 +12,7 @@
                     <form method="post" action="{{ url_to('admin.branding.update') }}" enctype="multipart/form-data">
                         @csrf
                         <label class="form-label" for="logo">{{ lang('Admin.branding.upload_new') }}</label>
-                        <input id="logo" type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/webp,image/gif" required>
+                        <input id="logo" type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg" required>
                         <div class="form-text">{{ lang('Admin.branding.help') }}</div>
                         <div class="d-flex gap-2 mt-3">
                             <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> {{ lang('Admin.branding.upload') }}</button>

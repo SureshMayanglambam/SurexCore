@@ -16,6 +16,7 @@
  * @var CodeIgniter\Router\RouteCollection $routes
  */
 
+use App\Controller\BrandingFile;
 use App\Controller\Contact;
 use App\Controller\Errors;
 use App\Controller\Home;
@@ -29,6 +30,9 @@ $routes->set404Override(Errors::class . '::notFound');
 // Built automatically from these routes and the published entries (App/Config/Sitemap.php)
 $routes->get('sitemap.xml', [Seo::class, 'sitemap'], ['as' => 'sitemap']);
 $routes->get('robots.txt', [Seo::class, 'robots'], ['as' => 'robots']);
+
+// SVG site logo (Settings → Branding), served with a sandboxing CSP — see App\Controller\BrandingFile
+$routes->get('branding/(:segment)', [BrandingFile::class, 'show'], ['as' => 'branding.file']);
 
 // Installer (only reachable before installation — see App\Filters\InstallCheck)
 $routes->get('install', [Install::class, 'index'], ['as' => 'install']);

@@ -10,7 +10,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.5 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.1.6 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -399,10 +399,10 @@ The admin panel is available in **English and Japanese** — English by default,
 | Menu | Who | What |
 |---|---|---|
 | ダッシュボード | all | stats, charts, recent entries; 管理者 also see activity, system status and **disk usage** |
-| (content types) | all | entries: list, add, edit, **preview**, **複製**, delete → **ゴミ箱** (restore / delete for good / empty) |
+| (content types) | all | entries: list, add, edit, **preview**, **複製**, delete → **ゴミ箱** (restore / delete for good / empty); repeater rows fold up (collapsed on open, first value shown in the header) |
 | お問い合わせ | all | saved form submissions (only while 「お問い合わせを保存する」 is on) |
-| メディア | all | media library |
-| ブランディング | all | site logo (`setting('site_logo')`) |
+| メディア | all | media library; JPEG/PNG uploads are saved as **WebP** (`cms.convertToWebp`) |
+| ブランディング | all | site logo (`setting('site_logo')`): PNG, JPG, WebP, GIF or **SVG** (SVG is sanitized and served sandboxed) |
 | 設定 → 一般設定 | 管理者 | site name, date format, maintenance mode, **検索エンジンにインデックスさせない**, test mail |
 | 設定 → ユーザー / コンテンツタイプ / 操作ログ | 管理者 | users and roles, content types, activity log |
 | 設定 → バックアップ | 管理者 | download the database (.sql) or database + uploads (.zip); **deploy packages** for the server (初回公開用 / 更新用) |
@@ -548,7 +548,7 @@ SurexCore is built to be safe to run on shared hosting out of the box:
 - **Brute-force protection** — an IP that fails to log in 3 times is blocked from the admin panel until an admin unblocks it (Settings → Security, with an allow list for your own IPs); the admins get an email, login IDs under attack from many IPs are locked for a while, and changing a password signs out every other session of that account.
 - **Hidden admin URL**, the installer locked after setup, and errors hidden in production.
 - **Sanitized rich text** — editor HTML is cleaned on save (no scripts, iframes, event handlers or dangerous links).
-- **Safe uploads** — the file type is detected from the contents (not the name), files get random names, and images are re-encoded to strip metadata (EXIF/GPS) and hidden payloads.
+- **Safe uploads** — the file type is detected from the contents (not the name), files get random names, and images are re-encoded to strip metadata (EXIF/GPS) and hidden payloads. SVG is only accepted for the site logo: scripts, event handlers and external links are stripped, and it is served with a sandboxing Content-Security-Policy.
 - **Private attachments** — contact-form files and saved inquiries are kept out of public reach and are only downloadable by logged-in admins.
 - **Activity log** of logins (including failures) and changes, and **no plugin system** — no third-party plugin code to attack.
 

@@ -1,5 +1,5 @@
 /**
- * Entry form behaviour for custom fields: repeater rows and image/file uploads.
+ * Entry form behaviour for custom fields: repeater rows (collapsible) and image/file uploads.
  * Markup comes from View/admin/fields/field.blade.php and row.blade.php.
  */
 (() => {
@@ -89,11 +89,29 @@
         const rows = repeater.querySelector(':scope > .fld-rows').children;
         const max = +repeater.dataset.max;
         [...rows].forEach((row, i) => {
-            row.querySelector('.fld-row-number').textContent = i + 1;
-            row.querySelector('.fld-row-up').disabled = i === 0;
-            row.querySelector('.fld-row-down').disabled = i === rows.length - 1;
+            row.querySelector(':scope > .fld-row-head .fld-row-number').textContent = i + 1;
+            row.querySelector(':scope > .fld-row-head .fld-row-up').disabled = i === 0;
+            row.querySelector(':scope > .fld-row-head .fld-row-down').disabled = i === rows.length - 1;
+            updateSummary(row);
         });
         repeater.querySelector(':scope > .fld-row-add').disabled = max > 0 && rows.length >= max;
+        repeater.querySelector(':scope > .fld-rows-tools').hidden = rows.length < 2;
+    }
+
+    // ---------------------------------------------------------------- collapsible rows
+
+    function setCollapsed(row, collapsed) {
+        row.classList.toggle('is-collapsed', collapsed);
+        row.querySelector(':scope > .fld-row-head .fld-row-toggle').setAttribute('aria-expanded', String(!collapsed));
+    }
+
+    // Header text of a row: its first filled-in text input (not the rows nested inside it).
+    function updateSummary(row) {
+        const own = [...row.querySelectorAll(':scope > .fld-row-body input[type=text], :scope > .fld-row-body input[type=url], '
+            + ':scope > .fld-row-body input[type=email], :scope > .fld-row-body input[type=number], :scope > .fld-row-body textarea')]
+            .filter(el => el.closest('.fld-row') === row && !el.closest('.fld[hidden]') && !el.dataset.editorReady);
+        const text = own.map(el => el.value.trim()).find(v => v !== '') ?? '';
+        row.querySelector(':scope > .fld-row-head .fld-row-summary').textContent = text ? '— ' + text.slice(0, 80) : '';
     }
 
     function addRow(repeater) {
@@ -119,8 +137,39 @@
         refreshRepeater(repeater);
     }
 
+    // Saved rows start collapsed to keep the page short — unless the save failed, so errors stay visible.
+    if (!document.querySelector('.alert-danger')) {
+        document.querySelectorAll('.fld-rows > .fld-row').forEach(row => setCollapsed(row, true));
+    }
     document.querySelectorAll('.fld-repeater').forEach(ensureMinRows);
     evaluate();
+
+    document.addEventListener('click', e => {
+        const toggle = e.target.closest('.fld-row-toggle');
+        if (toggle) {
+            const row = toggle.closest('.fld-row');
+            setCollapsed(row, !row.classList.contains('is-collapsed'));
+            return;
+        }
+        const all = e.target.closest('.fld-rows-expand, .fld-rows-collapse');
+        if (all) {
+            const collapse = all.classList.contains('fld-rows-collapse');
+            all.closest('.fld-repeater').querySelectorAll(':scope > .fld-rows > .fld-row').forEach(row => setCollapsed(row, collapse));
+        }
+    });
+
+    // Keep the header text current while typing.
+    document.addEventListener('input', e => {
+        const row = e.target.closest('.fld-row');
+        if (row) updateSummary(row);
+    });
+
+    // A required field inside a collapsed row would block saving without showing why: open its rows.
+    document.addEventListener('invalid', e => {
+        for (let row = e.target.closest('.fld-row'); row; row = row.parentElement.closest('.fld-row')) {
+            setCollapsed(row, false);
+        }
+    }, true);
 
     document.addEventListener('click', async e => {
         const button = e.target.closest('.fld-row-add, .fld-row-remove, .fld-row-up, .fld-row-down');

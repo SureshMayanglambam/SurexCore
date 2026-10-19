@@ -2,6 +2,8 @@
 
 namespace App\Admin;
 
+use App\Libraries\ImageCleaner;
+use App\Libraries\SvgSanitizer;
 use App\Model\SettingModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -11,7 +13,10 @@ use CodeIgniter\HTTP\RedirectResponse;
  */
 class Branding extends AdminController
 {
-    /** Allowed logo types: detected MIME type => extension. (No SVG: it can contain scripts.) */
+    /**
+     * Allowed raster logo types: detected MIME type => extension. JPEG/PNG are saved as WebP
+     * (cms.convertToWebp). SVG is accepted too, but only after App\Libraries\SvgSanitizer.
+     */
     private const TYPES = [
         'image/png'  => 'png',
         'image/jpeg' => 'jpg',
@@ -20,6 +25,9 @@ class Branding extends AdminController
     ];
 
     private const MAX_KB = 2048;
+
+    /** SVG logos are text; a real logo is far smaller than this. */
+    private const SVG_MAX_KB = 512;
 
     private const DIR = 'uploads/branding';
 
@@ -39,20 +47,36 @@ class Branding extends AdminController
             return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_too_big'));
         }
 
-        // Checked by the file contents, not by the file name.
-        $ext = self::TYPES[$file->getMimeType()] ?? null;
-        if ($ext === null || @getimagesize($file->getTempName()) === false) {
-            return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_type'));
-        }
-
         if (! is_dir(FCPATH . self::DIR) && ! mkdir(FCPATH . self::DIR, 0755, true)) {
             return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_no_write'));
         }
 
-        $name = 'logo-' . bin2hex(random_bytes(6)) . '.' . $ext;
         $mime = $file->getMimeType();
-        $file->move(FCPATH . self::DIR, $name);
-        (new \App\Libraries\ImageCleaner())->clean(FCPATH . self::DIR . '/' . $name, $mime);
+
+        if ($this->isSvg($file)) {
+            if ($file->getSizeByUnit('kb') > self::SVG_MAX_KB) {
+                return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_svg_too_big'));
+            }
+            $svg = (new SvgSanitizer())->sanitize((string) file_get_contents($file->getTempName()));
+            if ($svg === null) {
+                return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_svg_invalid'));
+            }
+            $name = 'logo-' . bin2hex(random_bytes(6)) . '.svg';
+            if (file_put_contents(FCPATH . self::DIR . '/' . $name, $svg, LOCK_EX) === false) {
+                return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_no_write'));
+            }
+        } else {
+            // Checked by the file contents, not by the file name.
+            $ext = self::TYPES[$mime] ?? null;
+            if ($ext === null || @getimagesize($file->getTempName()) === false) {
+                return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_type'));
+            }
+
+            $name = 'logo-' . bin2hex(random_bytes(6)) . '.' . $ext;
+            $file->move(FCPATH . self::DIR, $name);
+            // Strips metadata; JPEG/PNG become WebP (the name's extension changes then).
+            $name = basename((new ImageCleaner())->clean(FCPATH . self::DIR . '/' . $name, $mime));
+        }
 
         $this->removeFile(setting('site_logo', ''));
         model(SettingModel::class)->put('site_logo', self::DIR . '/' . $name);
@@ -68,6 +92,18 @@ class Branding extends AdminController
         log_activity('settings.logo', 'サイトロゴを削除しました');
 
         return redirect()->route('admin.branding')->with('success', lang('Admin.flash.brand_deleted'));
+    }
+
+    /**
+     * An SVG upload: detected as SVG, or XML/text with a .svg name (servers detect plain SVGs differently).
+     * Whether it really is a usable SVG is decided by SvgSanitizer.
+     */
+    private function isSvg(\CodeIgniter\HTTP\Files\UploadedFile $file): bool
+    {
+        $mime = $file->getMimeType();
+
+        return $mime === 'image/svg+xml'
+            || (in_array($mime, ['text/xml', 'application/xml', 'text/plain', 'image/svg'], true) && strtolower($file->getClientExtension()) === 'svg');
     }
 
     /**

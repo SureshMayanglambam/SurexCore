@@ -141,7 +141,7 @@
             @break
 
         @case('group')
-            <div class="border rounded p-3 bg-body-tertiary">
+            <div class="fld-group-box">
                 @foreach($field['sub_fields'] as $sub)
                     @include('admin.fields.field', [
                         'field' => $sub,
@@ -158,6 +158,12 @@
                 $token = '__ROW_' . $field['key'] . '__';
             @endphp
             <div class="fld-repeater" data-token="{{ $token }}" data-min="{{ $field['min_rows'] ?? 0 }}" data-max="{{ $field['max_rows'] ?? 0 }}">
+                {{-- Shown once there are 2+ rows (entry-form.js) --}}
+                <div class="fld-rows-tools small mb-1" hidden>
+                    <button type="button" class="btn btn-link btn-sm p-0 fld-rows-expand">{{ lang('Admin.field.expand_all') }}</button>
+                    <span class="text-secondary mx-1">·</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 fld-rows-collapse">{{ lang('Admin.field.collapse_all') }}</button>
+                </div>
                 <div class="fld-rows">
                     @foreach($rows as $i => $row)
                         @include('admin.fields.row', ['field' => $field, 'row' => $row, 'rowName' => $name . '[' . $i . ']'])

@@ -125,7 +125,7 @@ return [
         'subtitle'    => '管理画面のサイドバー上部に表示されるロゴです。',
         'site_logo'   => 'サイトロゴ',
         'upload_new'  => '新しいロゴをアップロード',
-        'help'        => 'PNG・JPG・WebP・GIF形式、最大2MBまで。サイドバーは暗い背景のため、背景が透明な白または明るい色のロゴ（PNG）がおすすめです。サイト名の左に、最大40 × 40pxの円形で表示されます（正方形の画像がおすすめです）。',
+        'help'        => 'PNG・JPG・WebP・GIF・SVG形式、最大2MBまで（SVGは512KBまで）。PNGとJPGはWebPに変換して保存します。サイドバーは暗い背景のため、背景が透明な白または明るい色のロゴ（SVG・PNG）がおすすめです。サイト名の左に、最大40 × 40pxの円形で表示されます（正方形の画像がおすすめです）。',
         'upload'      => 'ロゴをアップロード',
         'confirm_del' => 'ロゴを削除しますか？削除後はサイト名が表示されます。',
         'delete'      => 'ロゴを削除',
@@ -229,6 +229,9 @@ return [
         'row_up'          => '上へ',
         'row_down'        => '下へ',
         'row_remove'      => '行を削除',
+        'row_toggle'   => 'この行を開く / 閉じる',
+        'expand_all'   => 'すべて開く',
+        'collapse_all' => 'すべて閉じる',
     ],
 
     // ---- CKEditor ----
@@ -735,7 +738,9 @@ return [
         // branding
         'brand_pick'       => 'アップロードする画像ファイルを選択してください。',
         'brand_too_big'    => 'ロゴのファイルサイズが大きすぎます（最大2MB）。',
-        'brand_type'       => 'ロゴはPNG・JPG・WebP・GIF形式の画像を指定してください。',
+        'brand_type'       => 'ロゴはPNG・JPG・WebP・GIF・SVG形式の画像を指定してください。',
+        'brand_svg_invalid' => 'このSVGを読み込めませんでした。DOCTYPEを含まない、通常のSVG形式（「プレーンSVG」など）で保存し直してください。',
+        'brand_svg_too_big' => 'SVGファイルが大きすぎます（最大512KB）。',
         'brand_no_write'   => 'アップロードフォルダに書き込めません。',
         'brand_updated'    => 'ロゴを更新しました。',
         'brand_deleted'    => 'ロゴを削除しました。代わりにサイト名が表示されます。',

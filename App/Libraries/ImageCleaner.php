@@ -6,20 +6,28 @@ namespace App\Libraries;
  * Re-encodes uploaded JPEG / PNG / WebP images with GD: removes all metadata (EXIF GPS location,
  * camera data) and anything hidden inside the file. Phone photos are turned upright first, since the
  * EXIF orientation tag is dropped. GIFs are kept as they are (animation).
+ *
+ * With cms.convertToWebp (default on), JPEG and PNG are saved as WebP when that makes the file
+ * smaller: JPEG as lossy WebP (cms.webpQuality), PNG as lossless WebP so logos and screenshots
+ * stay pixel-perfect and keep their transparency.
  */
 class ImageCleaner
 {
-    public function clean(string $path, string $mime): void
+    /**
+     * Clean the image in place. Returns the path of the final file: the same path, or the
+     * same name with a .webp extension when it was converted (the original is then deleted).
+     */
+    public function clean(string $path, string $mime): string
     {
         if (! in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true) || ! function_exists('imagecreatefromstring')) {
-            return;
+            return $path;
         }
 
         try {
             $data  = (string) file_get_contents($path);
             $image = @imagecreatefromstring($data);
             if ($image === false) {
-                return;
+                return $path;
             }
 
             if ($mime === 'image/jpeg') {
@@ -34,12 +42,60 @@ class ImageCleaner
                 imagesavealpha($image, true);
                 imagewebp($image, $path, 90);
             }
-            imagedestroy($image);
             clearstatcache(true, $path);
+
+            if ($mime !== 'image/webp') {
+                $path = $this->toWebp($image, $path, $mime);
+            }
+            imagedestroy($image);
         } catch (\Throwable $e) {
             // Keep the original file (e.g. too large for memory_limit), but note it.
             log_message('warning', 'Image could not be cleaned ({path}): {message}', ['path' => $path, 'message' => $e->getMessage()]);
         }
+
+        return $path;
+    }
+
+    /**
+     * Save a WebP copy next to the cleaned file and keep whichever is smaller.
+     */
+    private function toWebp(\GdImage $image, string $path, string $mime): string
+    {
+        $cms = config('Cms');
+        if (! $cms->convertToWebp || ! function_exists('imagewebp')) {
+            return $path;
+        }
+
+        $webp = preg_replace('/\.[A-Za-z0-9]+$/', '', $path) . '.webp';
+        if ($webp === $path || is_file($webp)) {
+            return $path;
+        }
+
+        if (! imageistruecolor($image)) {
+            imagepalettetotruecolor($image);   // WebP needs a true-colour image (8-bit PNGs are palette)
+        }
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+
+        $quality = $mime === 'image/png' && defined('IMG_WEBP_LOSSLESS')
+            ? IMG_WEBP_LOSSLESS
+            : max(1, min(100, $cms->webpQuality));
+
+        if (! @imagewebp($image, $webp, $quality)) {
+            @unlink($webp);
+
+            return $path;
+        }
+        clearstatcache(true, $webp);
+
+        if (filesize($webp) > 0 && filesize($webp) < filesize($path)) {
+            unlink($path);
+
+            return $webp;
+        }
+        unlink($webp);
+
+        return $path;
     }
 
     /**
