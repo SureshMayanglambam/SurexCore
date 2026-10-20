@@ -16,6 +16,7 @@
  * @var CodeIgniter\Router\RouteCollection $routes
  */
 
+use App\Controller\Api;
 use App\Controller\BrandingFile;
 use App\Controller\Contact;
 use App\Controller\Errors;
@@ -33,6 +34,14 @@ $routes->get('robots.txt', [Seo::class, 'robots'], ['as' => 'robots']);
 
 // SVG site logo (Settings → Branding), served with a sandboxing CSP — see App\Controller\BrandingFile
 $routes->get('branding/(:segment)', [BrandingFile::class, 'show'], ['as' => 'branding.file']);
+
+// Read-only JSON API: content types listed in cms.apiTypes (.env) — see App\Controller\Api
+$routes->group('api', static function ($routes) {
+    $routes->get('site', [Api::class, 'site'], ['as' => 'api.site']);
+    $routes->get('(:segment)', [Api::class, 'index'], ['as' => 'api.index']);
+    $routes->get('(:segment)/(:segment)', [Api::class, 'show'], ['as' => 'api.show']);
+    $routes->options('(:any)', [Api::class, 'preflight']);
+});
 
 // Installer (only reachable before installation — see App\Filters\InstallCheck)
 $routes->get('install', [Install::class, 'index'], ['as' => 'install']);

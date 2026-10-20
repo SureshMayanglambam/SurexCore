@@ -22,6 +22,10 @@ textarea.text-mono { min-height: 360px; }
 a.fld-upload-preview { max-width: 60%; }
 .fld-row .card-body > .fld:last-child { margin-bottom: 1rem !important; }
 
+/* Content type form: REST API switch */
+.api-box { border: 1px dashed #CFDDD5; border-radius: var(--r-md, 10px); padding: .9rem 1rem; background: #F8FBF9; }
+.api-urls > div { margin: .25rem 0; word-break: break-all; }
+
 /* Repeater rows and groups: a tinted box with an accent edge shows which fields belong together.
    Nested levels alternate tint / white so each level stays readable. */
 .card .fld-row { border: 1px solid #DCE7E0 !important; border-left: 3px solid #A9D46B !important; border-radius: var(--r-md, 10px) !important; overflow: hidden; }

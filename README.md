@@ -10,7 +10,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.6 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.1.7 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -406,6 +406,32 @@ The admin panel is available in **English and Japanese** — English by default,
 | 設定 → 一般設定 | 管理者 | site name, date format, maintenance mode, **検索エンジンにインデックスさせない**, test mail |
 | 設定 → ユーザー / コンテンツタイプ / 操作ログ | 管理者 | users and roles, content types, activity log |
 | 設定 → バックアップ | 管理者 | download the database (.sql) or database + uploads (.zip); **deploy packages** for the server (初回公開用 / 更新用) |
+
+## JSON API (read-only)
+
+Other sites and apps can read published content as JSON. Nothing is exposed until you switch it on:
+**Settings → Content Types → (type) → "Expose REST API"** — the form then shows the URLs, and the list marks the type with an **API** badge. No routes or code to add.
+
+Optional settings in `.env`:
+
+```
+cms.apiOrigins = 'https://other-site.com'   # browser JavaScript on these sites may call it (CORS)
+cms.apiKey = ''                             # require header X-API-Key
+cms.apiTypes = 'news'                       # expose types from .env as well (comma separated slugs)
+```
+
+| Request | Returns |
+|---|---|
+| `GET /api/site` | site name, tagline, logo URL, the exposed content types |
+| `GET /api/news?page=1&limit=10` | published entries, newest first, with `meta` (total, pages) and `links` (prev / next) |
+| `GET /api/news/{slug}` | one published entry |
+
+Each entry has `id`, `slug`, `title`, `url`, `published_at`, `seo` and `fields` (every custom field by name: images as full URLs, choices as `{value, label}`, relations as `{id, slug, title}`, repeaters as lists). Drafts, scheduled and ended entries, users, inquiries and settings are never returned. 120 requests per minute per IP.
+
+```php
+// Another site (PHP)
+$news = json_decode(file_get_contents('https://your-site.com/api/news?limit=5'), true)['data'];
+```
 
 ## Configuration (.env)
 

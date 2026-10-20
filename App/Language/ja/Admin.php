@@ -508,6 +508,11 @@ return [
 
     // ---- content type form ----
     'typeform' => [
+        'api_enabled'  => 'REST APIで公開する',
+        'api_help'     => '公開中の投稿を、他のWebサイトやアプリからJSONで読み込めるようにします（読み取り専用。下書きやその他のデータは含まれません）。',
+        'api_list'     => '一覧・新しい順（?page=、?limit=）',
+        'api_single'   => '1件',
+        'api_off'      => 'オンにして保存すると、{0} で取得できるようになります',
         'slug_token'    => '{スラッグ}',
         'edit'          => 'コンテンツタイプを編集',
         'add'           => 'コンテンツタイプを追加',
@@ -757,6 +762,7 @@ return [
 
     // validation field labels
     'val' => [
+        'api_enabled'  => 'REST APIで公開',
         'slug'           => 'スラッグ',
         'status'         => 'ステータス',
         'published_at'   => '公開日時',

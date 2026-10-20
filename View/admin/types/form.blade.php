@@ -63,6 +63,28 @@
                         <input id="sort_order" type="number" name="sort_order" class="form-control"
                                value="{{ old('sort_order', $item->sort_order ?? 0) }}">
                     </div>
+
+                    {{-- REST API: published entries as JSON at /api/{slug} (App\Controller\Api) --}}
+                    <div class="col-12">
+                        <div class="api-box">
+                            <input type="hidden" name="api_enabled" value="0">
+                            <div class="form-check form-switch mb-1">
+                                <input id="api_enabled" type="checkbox" name="api_enabled" value="1" class="form-check-input"
+                                       @checked((string) old('api_enabled', (string) ($item->api_enabled ?? 0)) === '1')>
+                                <label class="form-check-label fw-semibold" for="api_enabled"><i class="bi bi-braces me-1"></i>{{ lang('Admin.typeform.api_enabled') }}</label>
+                            </div>
+                            <div class="form-text mt-0">{{ lang('Admin.typeform.api_help') }}</div>
+                            @php $apiSlug = $item->slug ?? lang('Admin.typeform.slug_token'); @endphp
+                            @if($item && ! empty($item->api_enabled))
+                                <div class="api-urls mt-2">
+                                    <div><span class="badge text-bg-success me-2">GET</span><a href="{{ site_url('api/' . $item->slug) }}" target="_blank" rel="noopener"><code>{{ site_url('api/' . $item->slug) }}</code></a> <span class="small text-secondary">{{ lang('Admin.typeform.api_list') }}</span></div>
+                                    <div><span class="badge text-bg-success me-2">GET</span><code>{{ site_url('api/' . $item->slug) }}/{slug}</code> <span class="small text-secondary">{{ lang('Admin.typeform.api_single') }}</span></div>
+                                </div>
+                            @else
+                                <div class="small text-secondary mt-2">{{ lang('Admin.typeform.api_off', [site_url('api/' . $apiSlug)]) }}</div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

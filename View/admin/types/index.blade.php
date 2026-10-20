@@ -23,7 +23,11 @@
                             <a href="{{ url_to('admin.types.edit', $ct->id) }}" class="fw-semibold">{{ $ct->name }}</a>
                             @if($ct->description)<div class="small text-secondary">{{ $ct->description }}</div>@endif
                         </td>
-                        <td><code>{{ $slug }}</code></td>
+                        <td><code>{{ $slug }}</code>
+                            @if(! empty($ct->api_enabled))
+                                <a href="{{ site_url('api/' . $slug) }}" target="_blank" rel="noopener" class="badge text-bg-success text-decoration-none ms-1" title="{{ site_url('api/' . $slug) }}"><i class="bi bi-braces"></i> API</a>
+                            @endif
+                        </td>
                         <td><a href="{{ url_to('admin.entries', $slug) }}">{{ $counts[$slug] }}</a></td>
                         <td>{{ $ct->sort_order }}</td>
                         <td class="text-end text-nowrap">

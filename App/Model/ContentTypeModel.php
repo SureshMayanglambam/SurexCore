@@ -12,7 +12,7 @@ class ContentTypeModel extends Model
     protected $table         = 'content_types';
     protected $returnType    = 'object';
     protected $useTimestamps = true;
-    protected $allowedFields = ['name', 'singular', 'slug', 'icon', 'description', 'fields', 'title_field', 'preview_view', 'sort_order'];
+    protected $allowedFields = ['name', 'singular', 'slug', 'icon', 'description', 'fields', 'title_field', 'preview_view', 'api_enabled', 'sort_order'];
     protected $beforeInsert  = ['encodeFields'];
     protected $beforeUpdate  = ['encodeFields'];
     protected $afterFind     = ['decodeFields'];

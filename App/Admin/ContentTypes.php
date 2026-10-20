@@ -193,6 +193,7 @@ class ContentTypes extends AdminController
             'icon'        => ['label' => lang('Admin.val.icon'), 'rules' => 'permit_empty|max_length[50]|regex_match[/^[a-z0-9-]+$/]'],
             'description' => ['label' => lang('Admin.val.description'), 'rules' => 'permit_empty|max_length[255]'],
             'sort_order'  => ['label' => lang('Admin.val.sort'), 'rules' => 'permit_empty|integer'],
+            'api_enabled' => ['label' => lang('Admin.val.api_enabled'), 'rules' => 'permit_empty|in_list[0,1]'],
             'preview_view' => ['label' => lang('Admin.val.preview_tpl'), 'rules' => ['permit_empty', 'max_length[191]', 'regex_match[/^(frontend(\.[a-z0-9_-]+)+|\/[a-z0-9\/_-]*)$/]']],
         ];
         $messages = [
@@ -243,6 +244,7 @@ class ContentTypes extends AdminController
             'title_field' => $titleField,
             'sort_order'  => (int) $input['sort_order'],
             'preview_view' => $previewView !== '' ? $previewView : null,
+            'api_enabled'  => ($input['api_enabled'] ?? '') === '1' ? 1 : 0,
         ];
     }
 }

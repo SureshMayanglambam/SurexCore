@@ -20,7 +20,7 @@ class Cms extends BaseConfig
     /**
      * CMS version shown in the admin footer.
      */
-    public string $version = '0.1.6';
+    public string $version = '0.1.7';
 
     /**
      * Product name and developer credit (welcome page). Constants: only changeable here in the code.
@@ -72,6 +72,26 @@ class Cms extends BaseConfig
      */
     public bool $convertToWebp = true;
     public int $webpQuality    = 82;
+
+    /**
+     * Read-only JSON API (App\Controller\Api): content types readable at /api/{slug}, comma separated,
+     * e.g. 'news,events'. Only published entries; nothing is exposed until listed here (.env: cms.apiTypes).
+     * /api/site (site name, tagline, logo) is always available.
+     */
+    public string $apiTypes = '';
+
+    /**
+     * Other websites whose browser JavaScript may call the API (CORS), comma separated origins,
+     * e.g. 'https://example.com,https://www.example.com'; '*' = any site. Server-side calls (PHP)
+     * don't need this (.env: cms.apiOrigins).
+     */
+    public string $apiOrigins = '';
+
+    /**
+     * When set, every API request needs it: header "X-API-Key: …" (or ?api_key=…). Empty = open read
+     * access, which is fine for content that is public on the website anyway (.env: cms.apiKey).
+     */
+    public string $apiKey = '';
 
     /**
      * Template the installer fills in to create .env.

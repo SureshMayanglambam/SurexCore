@@ -507,6 +507,11 @@ return [
 
     // ---- content type form ----
     'typeform' => [
+        'api_enabled'  => 'Expose REST API',
+        'api_help'     => 'Published entries can be read as JSON by other websites and apps (read-only; drafts and other data are never included).',
+        'api_list'     => 'list, newest first (?page=, ?limit=)',
+        'api_single'   => 'one entry',
+        'api_off'      => 'When switched on and saved, the entries are available at {0}',
         'slug_token'    => '{slug}',
         'edit'          => 'Edit content type',
         'add'           => 'Add content type',
@@ -747,6 +752,7 @@ return [
     ],
 
     'val' => [
+        'api_enabled'  => 'Expose REST API',
         'slug'           => 'Slug',
         'status'         => 'Status',
         'published_at'   => 'Publish date',
