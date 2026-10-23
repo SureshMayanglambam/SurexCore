@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Model;
+namespace App\Model\Http;
 
+use App\Model\EntryModel;
 /**
  * Recruit (content type "recruit").
  *

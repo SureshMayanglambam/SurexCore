@@ -18,13 +18,15 @@
 
 use App\Controller\Api;
 use App\Controller\BrandingFile;
-use App\Controller\Contact;
 use App\Controller\Errors;
-use App\Controller\Home;
 use App\Controller\Install;
-use App\Controller\News;
 use App\Controller\Page;
 use App\Controller\Seo;
+
+// This site's own controllers (App/Controller/Http)
+use App\Controller\Http\Contact;
+use App\Controller\Http\Home;
+use App\Controller\Http\News;
 
 $routes->set404Override(Errors::class . '::notFound');
 

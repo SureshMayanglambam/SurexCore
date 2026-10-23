@@ -14,7 +14,7 @@ use CodeIgniter\Database\Seeder;
  *
  * Creates the sample content type お知らせ (slug "news") with one field of each common kind and
  * 3 published entries. Run it again to add fields that are missing from an older sample.
- * Used by App/Controller/News.php and View/frontend/news/.
+ * Used by App/Controller/Http/News.php and View/frontend/news/.
  */
 class NewsSample extends Seeder
 {

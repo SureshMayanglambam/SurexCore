@@ -22,6 +22,50 @@ textarea.text-mono { min-height: 360px; }
 a.fld-upload-preview { max-width: 60%; }
 .fld-row .card-body > .fld:last-child { margin-bottom: 1rem !important; }
 
+/* Dashboard: Google Analytics card */
+.ga-card .card-header { row-gap: .5rem; }
+.ga-card [data-ga-days] { white-space: nowrap; }
+.ga-live { white-space: nowrap; }
+.ga-kpi { border: 1px solid var(--line, #E9EFEF); border-radius: var(--r-md, 10px); padding: .9rem 1rem; height: 100%; }
+.ga-kpi-label { font-size: .78rem; color: var(--muted, #6C7E75); font-weight: 600; }
+.ga-kpi-value { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; color: var(--text, #0B130F); }
+.ga-kpi-delta { font-size: .76rem; color: var(--muted, #6C7E75); }
+.ga-kpi-delta.is-up { color: #15803D; }
+.ga-kpi-delta.is-down { color: #B91C1C; }
+.ga-sub { font-size: .85rem; font-weight: 700; margin-bottom: .75rem; color: var(--text, #0B130F); }
+.ga-chart { position: relative; height: 240px; }
+.ga-donut { position: relative; height: 170px; margin-bottom: .75rem; }
+.ga-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.ga-donut-center strong { font-size: 1.35rem; font-weight: 800; line-height: 1.1; color: var(--text, #0B130F); }
+.ga-donut-center span { font-size: .72rem; color: var(--muted, #6C7E75); }
+.ga-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.ga-table th { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted, #6C7E75); padding: 0 .5rem .45rem; border-bottom: 1px solid var(--line, #E9EFEF); text-align: left; white-space: nowrap; }
+.ga-table td { padding: .55rem .5rem; border-bottom: 1px solid #F1F4F2; vertical-align: middle; }
+.ga-table tr:last-child td { border-bottom: 0; }
+.ga-table th:first-child, .ga-table td:first-child { padding-left: 0; }
+.ga-table th:last-child, .ga-table td:last-child { padding-right: 0; }
+.ga-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; color: var(--text, #0B130F); }
+.ga-table th.num { font-weight: 700; color: var(--muted, #6C7E75); }
+.ga-table .rank { width: 1.75rem; color: var(--muted, #6C7E75); font-variant-numeric: tabular-nums; }
+.ga-table .name { max-width: 0; width: 100%; }
+.ga-table .share { width: 96px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted, #6C7E75); }
+.ga-cell-main { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ga-table .num .ga-cell-main, .ga-table .share .ga-cell-main { display: inline; }
+.ga-cell-sub { display: block; font-size: .72rem; color: var(--muted, #6C7E75); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ga-share-track { display: block; height: 4px; border-radius: 4px; background: #EEF2F0; margin-top: .3rem; overflow: hidden; }
+.ga-share-fill { display: block; height: 100%; border-radius: 4px; background: #16A34A; }
+.ga-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: .5rem; vertical-align: -1px; }
+.ga-legend td:first-child .ga-cell-main { display: inline; }
+.ga-bar { margin-bottom: .65rem; }
+.ga-bar-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .84rem; }
+.ga-bar-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ga-bar-value { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text, #0B130F); }
+.ga-bar-track { height: 6px; border-radius: 4px; background: #EEF2F0; margin-top: .25rem; overflow: hidden; }
+.ga-bar-fill { height: 100%; border-radius: 4px; background: #16A34A; }
+.ga-live { display: inline-flex; align-items: center; gap: .4rem; color: var(--text, #0B130F); font-weight: 600; }
+.ga-dot { width: 8px; height: 8px; border-radius: 50%; background: #16A34A; box-shadow: 0 0 0 3px rgba(22,163,74,.2); }
+.ga-steps li { margin-bottom: .6rem; }
+
 /* Content type form: REST API switch */
 .api-box { border: 1px dashed #CFDDD5; border-radius: var(--r-md, 10px); padding: .9rem 1rem; background: #F8FBF9; }
 .api-urls > div { margin: .25rem 0; word-break: break-all; }

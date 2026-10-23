@@ -1,5 +1,5 @@
 {{--
-    お問い合わせ: 入力 → 確認 → 完了 (App/Controller/Contact.php).
+    お問い合わせ: 入力 → 確認 → 完了 (App/Controller/Http/Contact.php).
     Fields and validation rules are defined in the controller ($fields); mails in View/frontend/contact/mail/.
 --}}
 @extends('frontend.layout.default')

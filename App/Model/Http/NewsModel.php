@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Model;
+namespace App\Model\Http;
 
+use App\Model\EntryModel;
 /**
  * お知らせ (content type "news"). Create it with: php spark db:seed NewsSample
  *

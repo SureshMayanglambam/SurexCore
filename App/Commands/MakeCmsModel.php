@@ -7,7 +7,7 @@ use CodeIgniter\CLI\CLI;
 
 /**
  * php spark make:cms-model Store [--slug=store] [--force]
- * → App/Model/StoreModel.php, a model for the content type "store" (created in the admin).
+ * → App/Model/Http/StoreModel.php, a model for the content type "store" (created in the admin).
  */
 class MakeCmsModel extends BaseCommand
 {
@@ -15,7 +15,7 @@ class MakeCmsModel extends BaseCommand
 
     protected $group       = 'SurexCore';
     protected $name        = 'make:cms-model';
-    protected $description = 'Create a model for a content type: App/Model/{Name}Model.php';
+    protected $description = 'Create a model for a content type: App/Model/Http/{Name}Model.php';
     protected $usage       = 'make:cms-model <Name> [options]';
     protected $arguments   = ['Name' => 'Model name without "Model", e.g. Store → StoreModel'];
     protected $options     = [
@@ -38,7 +38,9 @@ class MakeCmsModel extends BaseCommand
         $code = <<<PHP
             <?php
 
-            namespace App\\Model;
+            namespace App\\Model\\Http;
+
+            use App\\Model\\EntryModel;
 
             /**
              * {$name} (content type "{$slug}").
@@ -53,7 +55,7 @@ class MakeCmsModel extends BaseCommand
 
             PHP;
 
-        if (! $this->writeFile("Model/{$class}.php", $code)) {
+        if (! $this->writeFile("Model/Http/{$class}.php", $code)) {
             return EXIT_ERROR;
         }
 

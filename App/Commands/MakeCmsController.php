@@ -7,7 +7,7 @@ use CodeIgniter\CLI\CLI;
 
 /**
  * php spark make:cms-controller Store [--model=StoreModel] [--force]
- * → App/Controller/Store.php with index() and detail(), using App\Model\StoreModel.
+ * → App/Controller/Http/Store.php with index() and detail(), using App\Model\Http\StoreModel.
  */
 class MakeCmsController extends BaseCommand
 {
@@ -15,7 +15,7 @@ class MakeCmsController extends BaseCommand
 
     protected $group       = 'SurexCore';
     protected $name        = 'make:cms-controller';
-    protected $description = 'Create a frontend controller: App/Controller/{Name}.php';
+    protected $description = 'Create a frontend controller: App/Controller/Http/{Name}.php';
     protected $usage       = 'make:cms-controller <Name> [options]';
     protected $arguments   = ['Name' => 'Controller name, e.g. Store'];
     protected $options     = [
@@ -43,9 +43,10 @@ class MakeCmsController extends BaseCommand
         $code = <<<PHP
             <?php
 
-            namespace App\\Controller;
+            namespace App\\Controller\\Http;
 
-            use App\\Model\\{$model};
+            use App\\Controller\\FrontController;
+            use App\\Model\\Http\\{$model};
 
             class {$name} extends FrontController
             {
@@ -62,11 +63,11 @@ class MakeCmsController extends BaseCommand
 
             PHP;
 
-        if (! $this->writeFile("Controller/{$name}.php", $code)) {
+        if (! $this->writeFile("Controller/Http/{$name}.php", $code)) {
             return EXIT_ERROR;
         }
 
-        if (! is_file(APPPATH . "Model/{$model}.php")) {
+        if (! is_file(APPPATH . "Model/Http/{$model}.php")) {
             CLI::write("Next: php spark make:cms-model " . substr($model, 0, -5), 'yellow');
         }
 

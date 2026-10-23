@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Http;
 
+use App\Controller\FrontController;
 use CodeIgniter\CodeIgniter;
 use Config\Cms;
 

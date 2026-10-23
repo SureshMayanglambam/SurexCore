@@ -10,6 +10,7 @@
  */
 
 use App\Admin\ActivityLog;
+use App\Admin\Analytics;
 use App\Admin\Auth;
 use App\Admin\Backup;
 use App\Admin\Branding;
@@ -35,6 +36,9 @@ $routes->group(config('Cms')->adminPath, ['filter' => ['ipblock', 'dbupgrade']],
     $routes->group('', ['filter' => 'auth'], static function ($routes) {
         $routes->post('logout', [Auth::class, 'logout'], ['as' => 'admin.logout']);
         $routes->get('/', [Dashboard::class, 'index'], ['as' => 'admin.dashboard']);
+
+        // Dashboard card: Google Analytics numbers (JSON, Admin + WebAdmin)
+        $routes->get('analytics/data', [Analytics::class, 'data'], ['as' => 'admin.analytics.data']);
 
         $routes->get('profile', [Profile::class, 'edit'], ['as' => 'admin.profile']);
         $routes->put('profile', [Profile::class, 'update'], ['as' => 'admin.profile.update']);
@@ -98,6 +102,12 @@ $routes->group(config('Cms')->adminPath, ['filter' => ['ipblock', 'dbupgrade']],
         $routes->delete('content-types/(:num)', [ContentTypes::class, 'delete'], ['as' => 'admin.types.delete']);
 
         $routes->get('activity-log', [ActivityLog::class, 'index'], ['as' => 'admin.activity']);
+
+        // Analytics: connect Google Analytics 4 (property ID + service account key)
+        $routes->get('analytics', [Analytics::class, 'index'], ['as' => 'admin.analytics']);
+        $routes->post('analytics', [Analytics::class, 'update'], ['as' => 'admin.analytics.update']);
+        $routes->post('analytics/test', [Analytics::class, 'test'], ['as' => 'admin.analytics.test']);
+        $routes->delete('analytics/key', [Analytics::class, 'removeKey'], ['as' => 'admin.analytics.removeKey']);
 
         // Security: IPs blocked from the admin after failed logins, and the allow list
         $routes->get('security', [Security::class, 'index'], ['as' => 'admin.security']);

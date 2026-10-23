@@ -88,6 +88,9 @@ class Dashboard extends AdminController
             $data['disk']   = $this->diskUsage($this->request->getGet('refresh_disk') === '1');
         }
 
+        // Google Analytics card: the numbers are loaded by the page (Analytics::data), so Google never slows this down.
+        $data['gaConfigured'] = (new \App\Libraries\GoogleAnalytics())->isConfigured();
+
         return $this->render('admin.dashboard', $data);
     }
 

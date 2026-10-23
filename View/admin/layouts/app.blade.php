@@ -170,6 +170,9 @@
                                     <a href="{{ url_to('admin.activity') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/activity-log*'))])><p>{{ lang('Admin.nav.activity') }}</p></a>
                                 </li>
                                 <li class="nav-item">
+                                    <a href="{{ url_to('admin.analytics') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/analytics*'))])><p>{{ lang('Admin.nav.analytics') }}</p></a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="{{ url_to('admin.security') }}" @class(['nav-link', 'active' => url_is(admin_path('settings/security*'))])><p>{{ lang('Admin.nav.security') }}</p></a>
                                 </li>
                                 <li class="nav-item">

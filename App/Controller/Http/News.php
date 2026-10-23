@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Http;
 
-use App\Model\NewsModel;
+use App\Controller\FrontController;
+use App\Model\Http\NewsModel;
 
 class News extends FrontController
 {

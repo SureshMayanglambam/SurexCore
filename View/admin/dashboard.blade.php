@@ -90,6 +90,75 @@
         </div>
     </div>
 
+    {{-- Google Analytics (Settings → Analytics). Filled in by the script below from Analytics::data. --}}
+    @if($gaConfigured)
+        <div class="card mb-4 ga-card" id="ga-card" data-url="{{ url_to('admin.analytics.data') }}">
+            <div class="card-header flex-wrap">
+                <h3 class="card-title"><i class="bi bi-graph-up-arrow me-1"></i> {{ lang('Admin.dash.ga.title') }}
+                    <span class="badge text-bg-warning ms-2 ga-sample-badge" hidden title="{{ lang('Admin.dash.ga.sample_tip') }}">{{ lang('Admin.dash.ga.sample') }}</span></h3>
+                <div class="card-tools d-flex align-items-center gap-3">
+                    <span class="ga-live small" hidden><span class="ga-dot" aria-hidden="true"></span> <span data-ga="active"></span></span>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="{{ lang('Admin.dash.ga.range') }}">
+                        @foreach(\App\Libraries\GoogleAnalytics::RANGES as $d)
+                            <button type="button" @class(['btn btn-outline-secondary', 'active' => $d === 28]) data-ga-days="{{ $d }}" aria-pressed="{{ $d === 28 ? 'true' : 'false' }}">{{ lang('Admin.dash.ga.days', [$d]) }}</button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="ga-loading small text-secondary"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ lang('Admin.dash.ga.loading') }}</div>
+                <div class="ga-error alert alert-warning mb-0" role="alert" hidden></div>
+                <div class="ga-body" hidden>
+                    <div class="row g-3 mb-4">
+                        @foreach(['activeUsers' => 'users', 'sessions' => 'sessions', 'screenPageViews' => 'views', 'averageSessionDuration' => 'engagement'] as $metric => $label)
+                            <div class="col-6 col-xl-3">
+                                <div class="ga-kpi" data-ga-kpi="{{ $metric }}">
+                                    <div class="ga-kpi-label">{{ lang('Admin.dash.ga.' . $label) }}</div>
+                                    <div class="ga-kpi-value">—</div>
+                                    <div class="ga-kpi-delta"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <h4 class="ga-sub">{{ lang('Admin.dash.ga.per_day') }}</h4>
+                            <div class="ga-chart"><canvas id="ga-chart" role="img" aria-label="{{ lang('Admin.dash.ga.per_day') }}"></canvas></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h4 class="ga-sub">{{ lang('Admin.dash.ga.devices') }}</h4>
+                            <div class="ga-donut">
+                                <canvas id="ga-devices-chart" role="img" aria-label="{{ lang('Admin.dash.ga.devices') }}"></canvas>
+                                <div class="ga-donut-center" aria-hidden="true"><strong data-ga="devices-total"></strong><span>{{ lang('Admin.dash.ga.users') }}</span></div>
+                            </div>
+                            <table class="ga-table ga-legend" data-ga="devices"></table>
+                        </div>
+                        <div class="col-lg-7">
+                            <h4 class="ga-sub">{{ lang('Admin.dash.ga.pages') }}</h4>
+                            <table class="ga-table" data-ga="pages"></table>
+                        </div>
+                        <div class="col-lg-5">
+                            <h4 class="ga-sub">{{ lang('Admin.dash.ga.sources') }}</h4>
+                            <table class="ga-table" data-ga="sources"></table>
+                        </div>
+                    </div>
+                    <div class="small text-secondary mt-3" data-ga="updated"></div>
+                </div>
+            </div>
+        </div>
+    @elseif($user->role === 'admin')
+        <div class="card mb-4 ga-connect">
+            <div class="card-body d-flex flex-wrap align-items-center gap-3">
+                <i class="bi bi-graph-up-arrow fs-3 text-secondary" aria-hidden="true"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">{{ lang('Admin.dash.ga.connect_title') }}</div>
+                    <div class="small text-secondary">{{ lang('Admin.dash.ga.connect_text') }}</div>
+                </div>
+                <a href="{{ url_to('admin.analytics') }}" class="btn btn-outline-primary btn-sm">{{ lang('Admin.dash.ga.connect_btn') }}</a>
+            </div>
+        </div>
+    @endif
+
     {{-- Row 2: charts --}}
     <div class="row g-4 mb-4">
         <div class="col-xl-8">
@@ -358,4 +427,157 @@
     }
 })();
 </script>
+@if($gaConfigured)
+<script>
+// Google Analytics card: data from Analytics::data (cached on the server for an hour).
+// Text from Google (page titles, paths) is always set with textContent, never as HTML.
+(() => {
+    const card = document.getElementById('ga-card');
+    if (!card) return;
+
+    const L   = @json(lang('Admin.dash.ga'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+    const q   = sel => card.querySelector(sel);
+    const num = n => new Intl.NumberFormat(document.documentElement.lang).format(Math.round(n));
+    const dur = s => Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0');
+    let chart = null;
+
+    function el(tag, cls, text) {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text !== undefined) e.textContent = text;
+        return e;
+    }
+
+    function state(name, message) {
+        q('.ga-loading').hidden = name !== 'loading';
+        q('.ga-error').hidden = name !== 'error';
+        q('.ga-body').hidden = name !== 'ready';
+        if (name === 'error') q('.ga-error').textContent = message;
+    }
+
+    // Change vs the previous period: arrow + signed % in text, so it isn't color alone.
+    function delta(box, cur, prev) {
+        box.replaceChildren();
+        box.className = 'ga-kpi-delta';
+        if (!prev) { box.textContent = L.no_compare; return; }
+        const pct = (cur - prev) / prev * 100;
+        const up = pct >= 0;
+        box.classList.add(Math.abs(pct) < 0.5 ? 'is-flat' : (up ? 'is-up' : 'is-down'));
+        box.append(el('i', 'bi ' + (up ? 'bi-arrow-up-right' : 'bi-arrow-down-right')),
+                   ' ' + (up ? '+' : '') + pct.toFixed(1) + '% ' + L.vs_prev);
+    }
+
+    // Fixed colour per device (colour follows the device, not its rank). Validated for colour blindness;
+    // the legend table repeats name, number and share, so colour is never the only clue.
+    const DEVICE_COLORS = { mobile: '#16A34A', desktop: '#2A78D6', tablet: '#EDA100', 'smart tv': '#6250D6' };
+    let donut = null;
+    const pct = (n, total) => total > 0 ? (n / total * 100).toFixed(1) + '%' : '—';
+
+    // Table: rows of cells; a cell is text, or { text, sub, cls, bar } (bar = 0..1 share, drawn under the %).
+    function table(container, head, rows) {
+        container.replaceChildren();
+        if (!rows.length) { const tr = el('tr'); const td = el('td', 'text-secondary', L.no_data); tr.append(td); container.append(tr); return; }
+        const thead = el('thead'); const hr = el('tr');
+        head.forEach(h => hr.append(el('th', h.cls || '', h.text)));
+        thead.append(hr);
+        const tbody = el('tbody');
+        rows.forEach(cells => {
+            const tr = el('tr');
+            cells.forEach(c => {
+                const cell = typeof c === 'object' ? c : { text: String(c) };
+                const td = el('td', cell.cls || '');
+                if (cell.swatch) { const sw = el('span', 'ga-swatch'); sw.style.background = cell.swatch; td.append(sw); }
+                const main = el('span', 'ga-cell-main', cell.text);
+                if (cell.title) main.title = cell.title;
+                td.append(main);
+                if (cell.sub) td.append(el('span', 'ga-cell-sub', cell.sub));
+                if (cell.bar !== undefined) { const t = el('span', 'ga-share-track'); const f = el('span', 'ga-share-fill'); f.style.width = Math.max(2, cell.bar * 100) + '%'; t.append(f); td.append(t); }
+                tr.append(td);
+            });
+            tbody.append(tr);
+        });
+        container.append(thead, tbody);
+    }
+
+    function devices(list) {
+        const total = list.reduce((s, d) => s + d.users, 0);
+        q('[data-ga=devices-total]').textContent = num(total);
+        donut?.destroy();
+        donut = new Chart(document.getElementById('ga-devices-chart'), {
+            type: 'doughnut',
+            data: { labels: list.map(d => L.device[d.name] ?? d.name),
+                    datasets: [{ data: list.map(d => d.users), backgroundColor: list.map(d => DEVICE_COLORS[d.name] ?? '#8A9A92'),
+                                 borderColor: '#fff', borderWidth: 2, hoverOffset: 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#051C12', padding: 10, cornerRadius: 10,
+                    callbacks: { label: c => ' ' + c.label + ': ' + num(c.parsed) + ' (' + pct(c.parsed, total) + ')' } } } }
+        });
+        table(q('[data-ga=devices]'), [{ text: L.col_device }, { text: L.users, cls: 'num' }, { text: L.col_share, cls: 'num' }],
+            list.map(d => [{ text: L.device[d.name] ?? d.name, swatch: DEVICE_COLORS[d.name] ?? '#8A9A92' },
+                           { text: num(d.users), cls: 'num' }, { text: pct(d.users, total), cls: 'num' }]));
+    }
+
+    function render(r) {
+        const fmt = { activeUsers: num, sessions: num, screenPageViews: num, averageSessionDuration: dur };
+        card.querySelectorAll('[data-ga-kpi]').forEach(box => {
+            const m = box.dataset.gaKpi;
+            box.querySelector('.ga-kpi-value').textContent = fmt[m](r.current[m]);
+            delta(box.querySelector('.ga-kpi-delta'), r.current[m], r.previous[m]);
+        });
+
+        const labels = r.daily.map(d => { const [, mo, da] = d.date.split('-'); return +mo + '/' + +da; });
+        chart?.destroy();
+        chart = new Chart(document.getElementById('ga-chart'), {
+            type: 'line',
+            data: { labels, datasets: [{ label: L.users, data: r.daily.map(d => d.users), borderColor: '#16A34A', borderWidth: 2,
+                tension: .35, pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 12, fill: true,
+                backgroundColor: ctx => { const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height); g.addColorStop(0, 'rgba(22,163,74,.18)'); g.addColorStop(1, 'rgba(22,163,74,0)'); return g; } }] },
+            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#051C12', padding: 10, cornerRadius: 10,
+                    callbacks: { label: c => ' ' + L.users + ': ' + num(c.parsed.y), afterLabel: c => ' ' + L.views + ': ' + num(r.daily[c.dataIndex].views) } } },
+                scales: { x: { grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 8, maxRotation: 0 } },
+                          y: { beginAtZero: true, ticks: { precision: 0, maxTicksLimit: 5 }, grid: { color: '#EEF2F0' }, border: { display: false } } } }
+        });
+
+        devices(r.devices);
+
+        // Share of all page views / sessions in the period (not just of the rows shown)
+        const views = r.current.screenPageViews, sessions = r.current.sessions;
+        table(q('[data-ga=pages]'), [{ text: '#', cls: 'rank' }, { text: L.col_page }, { text: L.views, cls: 'num' }, { text: L.col_share, cls: 'share' }],
+            r.pages.map((p, i) => [{ text: i + 1, cls: 'rank' },
+                { text: p.title && p.title !== '(not set)' ? p.title : p.path, sub: p.path, title: p.path, cls: 'name' },
+                { text: num(p.views), cls: 'num' }, { text: pct(p.views, views), bar: views ? p.views / views : 0, cls: 'share' }]));
+        table(q('[data-ga=sources]'), [{ text: L.col_source }, { text: L.sessions, cls: 'num' }, { text: L.col_share, cls: 'share' }],
+            r.sources.map(s => [{ text: L.channel[s.name] ?? s.name, cls: 'name' },
+                { text: num(s.sessions), cls: 'num' }, { text: pct(s.sessions, sessions), bar: sessions ? s.sessions / sessions : 0, cls: 'share' }]));
+
+        const live = q('.ga-live');
+        live.hidden = r.active_now === null || r.active_now === undefined;
+        q('[data-ga=active]').textContent = L.active_now.replace('{0}', num(r.active_now ?? 0));
+        q('[data-ga=updated]').textContent = L.updated.replace('{0}', new Date(r.fetched).toLocaleString(document.documentElement.lang, { dateStyle: 'medium', timeStyle: 'short' }));
+    }
+
+    async function load(days) {
+        state('loading');
+        try {
+            const res = await fetch(card.dataset.url + '?days=' + days, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await res.json();
+            if (data.error) { state('error', data.error); return; }
+            if (!data.report) { state('error', L.load_failed); return; }
+            render(data.report);
+            q('.ga-sample-badge').hidden = !data.sample;
+            state('ready');
+        } catch (e) {
+            state('error', L.load_failed);
+        }
+    }
+
+    card.querySelectorAll('[data-ga-days]').forEach(btn => btn.addEventListener('click', () => {
+        card.querySelectorAll('[data-ga-days]').forEach(b => { b.classList.toggle('active', b === btn); b.setAttribute('aria-pressed', String(b === btn)); });
+        load(+btn.dataset.gaDays);
+    }));
+    load(28);
+})();
+</script>
+@endif
 @endpush

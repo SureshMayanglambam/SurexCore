@@ -10,7 +10,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.7 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.1.8 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -126,8 +126,10 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 ```
 App/
   Admin/                Admin panel controllers (namespace App\Admin)
-  Controller/           Website controllers: Home, News (sample), Contact, Page   ← you work here
-  Model/                Models: NewsModel (sample) + EntryModel base             ← and here
+  Controller/           SurexCore's controllers (Page, Api, Seo, Install, …) and the FrontController base
+    Http/               Your site's controllers: Home, News (sample), Contact     ← you work here
+  Model/                SurexCore's models (EntryModel base, users, media, …)
+    Http/               Your content type models: NewsModel (sample), …          ← and here
   Commands/             spark commands: make:cms-model, make:cms-controller, db:export
   Config/               CodeIgniter config + Cms.php (SurexCore settings), Sitemap.php
   Database/Migrations/  Schema changes, applied automatically
@@ -173,7 +175,7 @@ $routes->get('news', [News::class, 'index'], ['as' => 'news']);
 $routes->get('news/(:segment)', [News::class, 'detail'], ['as' => 'news.detail']);
 ```
 
-**Model** — `App/Model/NewsModel.php`: one line, like a Laravel model.
+**Model** — `App/Model/Http/NewsModel.php`: one line, like a Laravel model.
 ```php
 class NewsModel extends EntryModel
 {
@@ -181,7 +183,7 @@ class NewsModel extends EntryModel
 }
 ```
 
-**Controller** — `App/Controller/News.php`
+**Controller** — `App/Controller/Http/News.php`
 ```php
 public function index(): string
 {
@@ -234,8 +236,8 @@ NewsModel::query()->findOrFail($id);
 ## Generators
 
 ```bash
-php spark make:cms-model Store          # App/Model/StoreModel.php  — content type slug "store"
-php spark make:cms-controller Store     # App/Controller/Store.php  — uses StoreModel, empty index() / detail()
+php spark make:cms-model Store          # App/Model/Http/StoreModel.php  — content type slug "store"
+php spark make:cms-controller Store     # App/Controller/Http/Store.php  — uses StoreModel, empty index() / detail()
 ```
 
 | Option | Example |
@@ -359,7 +361,7 @@ Page-only styles go in their own file, pushed from the view: `@push('styles') <l
 
 ## Forms and mail
 
-`App/Controller/Contact.php` + `View/frontend/contact/` is a complete 入力 → 確認 → 完了 form: CSRF, honeypot, 3 sends per IP per 10 minutes, an admin mail (to `cms.adminEmail`) and an automatic reply.
+`App/Controller/Http/Contact.php` + `View/frontend/contact/` is a complete 入力 → 確認 → 完了 form: CSRF, honeypot, 3 sends per IP per 10 minutes, an admin mail (to `cms.adminEmail`) and an automatic reply.
 
 Rules are defined in the controller, Laravel-style, including `required_if[field,value]` / `required_unless[...]`:
 
@@ -406,6 +408,28 @@ The admin panel is available in **English and Japanese** — English by default,
 | 設定 → 一般設定 | 管理者 | site name, date format, maintenance mode, **検索エンジンにインデックスさせない**, test mail |
 | 設定 → ユーザー / コンテンツタイプ / 操作ログ | 管理者 | users and roles, content types, activity log |
 | 設定 → バックアップ | 管理者 | download the database (.sql) or database + uploads (.zip); **deploy packages** for the server (初回公開用 / 更新用) |
+
+## Upgrading a site from an older version
+
+Update locally first, test, then upload with the **Update** deploy package (the server's database, uploads and `.env` stay as they are).
+
+1. Unpack the new version. Don't run the installer: copy the old site's `.env` and `writable/installed.lock`, import its database, and copy `public/uploads/`.
+2. Copy your own code into it: `App/Controller/Http/`, `App/Model/Http/`, `View/frontend/`, `public/assets/frontend/`, and add your own route lines to the new `routes/web.php` (don't replace the file: it contains SurexCore's routes too).
+3. Open the admin once — database changes run automatically. Test, then deploy.
+
+**From 0.1.7 or older:** your site's controllers and models were directly in `App/Controller/` and `App/Model/`. They keep working there; to use the new layout, move them into the `Http/` folders and change their namespaces to `App\Controller\Http` / `App\Model\Http` (and the `use` lines in `routes/web.php`).
+
+## Google Analytics on the dashboard
+
+The dashboard can show Google Analytics 4 numbers, so clients don't have to log in to Google: visitors, sessions, page views and engagement time (with the change against the previous period), visitors per day, devices, top pages, traffic sources and visitors active now — for 7, 28 or 90 days. Administrators and Web admins see it; it is read-only and cached for an hour.
+
+**Settings → Analytics** (Administrator) explains every step. You need:
+
+1. the **GA4 property ID** — the number in Google Analytics → Admin → Property settings (not the `G-…` or `GTM-…` ID);
+2. a **Google Cloud service account** with the **Google Analytics Data API** enabled, and its **JSON key** file;
+3. that service account's e-mail added as **Viewer** in Google Analytics → Admin → Property access management.
+
+Enter the ID, upload the key, press **Test connection**. To check the layout first, switch on **Show sample data** (generated numbers, marked “Sample data” on the dashboard; no Google account needed). The key is stored in `writable/analytics/` (never served, not in backups or deploy packages — upload it again on a new server).
 
 ## JSON API (read-only)
 
