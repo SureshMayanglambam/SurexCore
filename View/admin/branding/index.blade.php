@@ -11,15 +11,29 @@
                 <div class="card-body">
                     <form method="post" action="{{ url_to('admin.branding.update') }}" enctype="multipart/form-data">
                         @csrf
-                        <label class="form-label" for="logo">{{ lang('Admin.branding.upload_new') }}</label>
+                        <label class="form-label" for="logo">{{ lang('Admin.branding.upload_new') }} <i class="bi bi-question-circle tip" tabindex="0" data-bs-toggle="tooltip" title="{{ lang('Admin.branding.help') }}"></i></label>
                         <input id="logo" type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg" required>
-                        <div class="form-text">{{ lang('Admin.branding.help') }}</div>
+                        <div class="form-text">{{ lang('Admin.branding.formats') }}</div>
                         <div class="d-flex gap-2 mt-3">
                             <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> {{ lang('Admin.branding.upload') }}</button>
                         </div>
                     </form>
 
                     @if($logo)
+                        <hr class="my-4">
+                        <form method="post" action="{{ url_to('admin.branding.background') }}" class="logo-bg-form">
+                            @csrf
+                            <label class="form-label" for="logo_bg">{{ lang('Admin.branding.bg') }} <i class="bi bi-question-circle tip" tabindex="0" data-bs-toggle="tooltip" title="{{ lang('Admin.branding.bg_tip') }}"></i></label>
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <input id="logo_bg" type="color" name="logo_bg" class="form-control form-control-color" value="{{ $logoBg ?: '#ffffff' }}" title="{{ lang('Admin.branding.bg') }}">
+                                <div class="form-check mb-0">
+                                    <input id="logo_bg_none" type="checkbox" name="logo_bg_none" value="1" class="form-check-input" @checked($logoBg === '')>
+                                    <label class="form-check-label" for="logo_bg_none">{{ lang('Admin.branding.bg_none') }}</label>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary btn-sm"><i class="bi bi-check-lg"></i> {{ lang('Admin.save') }}</button>
+                            </div>
+                        </form>
+
                         <hr class="my-4">
                         <form method="post" action="{{ url_to('admin.branding.delete') }}" onsubmit="return confirm('{{ lang('Admin.branding.confirm_del') }}')">
                             @csrf
@@ -38,7 +52,7 @@
                     <div class="logo-preview logo-preview-dark">
                         <span class="logo-fallback">
                             @if($logo)
-                                <img src="{{ media_url($logo) }}" alt="">
+                                <img src="{{ media_url($logo) }}" alt="" data-logo-preview @class(['has-bg' => $logoBg !== '']) @if($logoBg !== '') style="background: {{ $logoBg }}" @endif>
                             @else
                                 <i class="bi bi-asterisk"></i>
                             @endif
@@ -49,7 +63,7 @@
 
                     <div class="logo-preview logo-preview-light">
                         @if($logo)
-                            <img src="{{ media_url($logo) }}" alt="{{ $siteName }}">
+                            <img src="{{ media_url($logo) }}" alt="{{ $siteName }}" data-logo-preview @class(['has-bg' => $logoBg !== '']) @if($logoBg !== '') style="background: {{ $logoBg }}" @endif>
                         @else
                             <span class="text-secondary">{{ lang('Admin.branding.no_logo') }}</span>
                         @endif
@@ -60,3 +74,20 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+// Live preview of the logo background colour (saved only with the button).
+(() => {
+    const color = document.getElementById('logo_bg');
+    const none = document.getElementById('logo_bg_none');
+    if (!color || !none) return;
+    const apply = () => document.querySelectorAll('[data-logo-preview]').forEach(img => {
+        img.classList.toggle('has-bg', !none.checked);
+        img.style.background = none.checked ? '' : color.value;
+    });
+    color.addEventListener('input', () => { none.checked = false; apply(); });
+    none.addEventListener('change', apply);
+})();
+</script>
+@endpush

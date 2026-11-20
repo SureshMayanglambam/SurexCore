@@ -28,7 +28,7 @@
             </form>
         </div>
         <div class="card-body p-0">
-            <table class="table table-sm table-striped mb-0">
+            <table class="table table-sm table-striped mb-0 activity-table">
                 <thead><tr><th>{{ lang('Admin.activity.datetime') }}</th><th>{{ lang('Admin.activity.user') }}</th><th>{{ lang('Admin.activity.action') }}</th><th>{{ lang('Admin.activity.detail') }}</th><th>{{ lang('Admin.activity.ip') }}</th></tr></thead>
                 <tbody>
                 @forelse($items as $log)
@@ -39,7 +39,7 @@
                     @endphp
                     <tr>
                         <td class="text-nowrap">{{ date('Y-m-d H:i:s', strtotime($log->created_at)) }}</td>
-                        <td>{{ $log->user_name ?? '—' }}</td>
+                        <td class="text-nowrap">{{ $log->user_name ?? '—' }}</td>
                         <td><span class="badge text-bg-{{ $color }}">{{ $log->action }}</span></td>
                         <td>{{ $log->description }}</td>
                         <td class="text-mono" title="{{ $log->user_agent }}">{{ $log->ip_address }}</td>

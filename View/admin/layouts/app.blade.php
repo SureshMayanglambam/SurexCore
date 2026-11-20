@@ -84,7 +84,7 @@
         <div class="sidebar-brand">
             <a href="{{ url_to('admin.dashboard') }}" class="brand-link" title="{{ $siteName }}">
                 @if($siteLogo)
-                    <img src="{{ media_url($siteLogo) }}" alt="" class="brand-logo">
+                    <img src="{{ media_url($siteLogo) }}" alt="" @class(['brand-logo', 'has-bg' => $siteLogoBg !== '']) @if($siteLogoBg !== '') style="background: {{ $siteLogoBg }}" @endif>
                 @else
                     <img src="{{ base_url('assets/brand/surexcore-mark.png') }}" alt="" class="brand-mark" width="34" height="34">
                 @endif

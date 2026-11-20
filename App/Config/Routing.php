@@ -29,8 +29,9 @@ class Routing extends BaseRouting
      * @var list<string>
      */
     public array $routeFiles = [
+        ROOTPATH . 'routes/core.php',    // SurexCore's public routes (first, so they always win)
         ROOTPATH . 'routes/admin.php',
-        ROOTPATH . 'routes/web.php',
+        ROOTPATH . 'routes/web.php',     // this site's routes
     ];
 
     /**

@@ -88,6 +88,7 @@ class Seo extends BaseController
                 || str_starts_with($path, '__')                              // framework routes (__hot-reload)
                 || $path === $admin || str_starts_with($path, $admin . '/')
                 || in_array($path, ['sitemap.xml', 'robots.txt'], true)
+                || $path === 'api' || str_starts_with($path, 'api/')        // JSON API, not pages
                 || in_array($path, $config->exclude, true) || in_array($name, $config->exclude, true)) {
                 continue;
             }

@@ -49,6 +49,8 @@ abstract class AdminController extends BaseController
             'isAdmin'      => ($user->role ?? null) === 'admin',
             'siteName'     => setting('site_name', 'SurexCore'),
             'siteLogo'     => $user ? setting('site_logo', '') : '',
+            // Background colour behind the logo (Settings → Branding), '' = transparent
+            'siteLogoBg'   => $user ? (string) setting('site_logo_bg', '') : '',
             'contentTypes' => $user ? model(ContentTypeModel::class)->allBySlug() : [],
             // Role display labels follow the admin language; the keys (admin/webadmin) stay.
             'roles'        => ['admin' => lang('Admin.role_admin'), 'webadmin' => lang('Admin.role_webadmin')],

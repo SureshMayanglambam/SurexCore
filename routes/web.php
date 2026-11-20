@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Public website routes — write your own here, Laravel style:
+ * This site's routes — yours to edit (SurexCore's own routes are in routes/core.php). Laravel style:
  *
  *   $routes->get('about', [About::class, 'index'], ['as' => 'about']);
  *   $routes->get('store/(:segment)', [Store::class, 'show'], ['as' => 'store.show']);
@@ -16,38 +16,12 @@
  * @var CodeIgniter\Router\RouteCollection $routes
  */
 
-use App\Controller\Api;
-use App\Controller\BrandingFile;
-use App\Controller\Errors;
-use App\Controller\Install;
 use App\Controller\Page;
-use App\Controller\Seo;
 
 // This site's own controllers (App/Controller/Http)
 use App\Controller\Http\Contact;
 use App\Controller\Http\Home;
 use App\Controller\Http\News;
-
-$routes->set404Override(Errors::class . '::notFound');
-
-// Built automatically from these routes and the published entries (App/Config/Sitemap.php)
-$routes->get('sitemap.xml', [Seo::class, 'sitemap'], ['as' => 'sitemap']);
-$routes->get('robots.txt', [Seo::class, 'robots'], ['as' => 'robots']);
-
-// SVG site logo (Settings → Branding), served with a sandboxing CSP — see App\Controller\BrandingFile
-$routes->get('branding/(:segment)', [BrandingFile::class, 'show'], ['as' => 'branding.file']);
-
-// Read-only JSON API: content types listed in cms.apiTypes (.env) — see App\Controller\Api
-$routes->group('api', static function ($routes) {
-    $routes->get('site', [Api::class, 'site'], ['as' => 'api.site']);
-    $routes->get('(:segment)', [Api::class, 'index'], ['as' => 'api.index']);
-    $routes->get('(:segment)/(:segment)', [Api::class, 'show'], ['as' => 'api.show']);
-    $routes->options('(:any)', [Api::class, 'preflight']);
-});
-
-// Installer (only reachable before installation — see App\Filters\InstallCheck)
-$routes->get('install', [Install::class, 'index'], ['as' => 'install']);
-$routes->post('install', [Install::class, 'store']);
 
 $routes->get('/', [Home::class, 'index'], ['as' => 'home']);
 

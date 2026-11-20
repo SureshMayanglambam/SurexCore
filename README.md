@@ -10,7 +10,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.9 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.2.0 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -138,7 +138,8 @@ App/
   Filters/              InstallCheck, Maintenance, AdminAuth, DbUpgrade
   Libraries/            Blade, Fields, ContentSchema, Installer, DatabaseExport, ...
 routes/
-  web.php               Public website routes                                    ← and here
+  web.php               Your website routes                                       ← and here
+  core.php              SurexCore's public routes (sitemap, robots, API, installer) — loaded first
   admin.php             Admin routes
 View/
   frontend/             The website                                               ← and here
@@ -407,15 +408,35 @@ The admin panel is available in **English and Japanese**. The language is one si
 | ブランディング | all | site logo (`setting('site_logo')`): PNG, JPG, WebP, GIF or **SVG** (SVG is sanitized and served sandboxed) |
 | 設定 → 一般設定 | 管理者 | site name, date format, maintenance mode, **検索エンジンにインデックスさせない**, test mail |
 | 設定 → ユーザー / コンテンツタイプ / 操作ログ | 管理者 | users and roles, content types, activity log |
-| 設定 → バックアップ | 管理者 | download the database (.sql) or database + uploads (.zip); **deploy packages** for the server (初回公開用 / 更新用) |
+| 設定 → バックアップ | 管理者 | database backup (.sql), uploads backup (.zip), **Migration** (export / import the whole site, like All-in-One WP Migration), deploy packages |
+
+## Migration — move, copy or upgrade a site (like All-in-One WP Migration)
+
+**Settings → Backup → Migration** puts a whole site into one file and restores it on another SurexCore:
+
+| In the file | Not in the file |
+|---|---|
+| the database (all content, settings, **users**), uploads, contact attachments | SurexCore itself (it comes from the installed version) |
+| your code: `App/Controller/Http/`, `App/Model/Http/`, `View/frontend/`, `public/assets/frontend/`, `routes/web.php`, `App/Config/Sitemap.php` + `Pager.php`, your 404 / maintenance / pagination views, favicon | `.env` (each site keeps its own database, URL, mail), the IP block list, the Analytics key |
+
+**Export** (optionally with a password — AES-256) → on the target, install SurexCore (the installer writes `.env`) → **Import**. The import replaces the database, uploads and your code; the old site URL becomes the target's URL, a different table prefix is handled, and the database is updated to the installed SurexCore version. Afterwards you log in with the **exported site's** accounts. Big files are uploaded in small pieces (any hosting upload limit), or put them in `writable/migrations/` by FTP. Before importing, the current site is backed up automatically, and if the database import fails it is put back.
+
+Keep your own code in the folders above: a change to a SurexCore file (e.g. `App/Common.php`) does not travel with the migration.
+
+### Typical workflows
+- **Launch a site you built locally:** install SurexCore on the server → export locally → import on the server.
+- **Work on a copy of production:** export on production → install the latest SurexCore locally or on STG → import.
+- **Upgrade a site:** export it → install the new SurexCore version → import. (The file must come from the same or an older SurexCore version.)
 
 ## Upgrading a site from an older version
 
-Update locally first, test, then upload with the **Update** deploy package (the server's database, uploads and `.env` stay as they are).
+**From 0.2.0 on**, upgrade with Migration (above). Sites on older versions don't have the export yet — update them once by hand:
 
 1. Unpack the new version. Don't run the installer: copy the old site's `.env` and `writable/installed.lock`, import its database, and copy `public/uploads/`.
-2. Copy your own code into it: `App/Controller/Http/`, `App/Model/Http/`, `View/frontend/`, `public/assets/frontend/`, and add your own route lines to the new `routes/web.php` (don't replace the file: it contains SurexCore's routes too).
-3. Open the admin once — database changes run automatically. Test, then deploy.
+2. Copy your own code into it: `App/Controller/Http/`, `App/Model/Http/`, `View/frontend/`, `public/assets/frontend/`, and add your own route lines to the new `routes/web.php` (SurexCore's own routes are now in `routes/core.php`).
+3. Open the admin once — database changes run automatically. Test, then deploy with the **Update** package.
+
+**From 0.1.9 or older:** SurexCore's routes moved from `routes/web.php` to `routes/core.php`. An old `web.php` that still contains them keeps working (`core.php` is loaded first and wins); you can delete those lines.
 
 **From 0.1.8 or older:** the admin language is now one setting for the whole site. After updating it starts in English — choose 日本語 in **Settings → General → Admin language** if the site used Japanese.
 

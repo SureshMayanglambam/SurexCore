@@ -17,6 +17,37 @@
 use App\Model\EntryModel;
 use App\Model\SettingModel;
 
+// url_to() that keeps links to Japanese (non-ASCII) slugs working
+if (! function_exists('url_to')) {
+    /**
+     * url_to('news.detail', $slug) like CodeIgniter's, but safe for non-ASCII parameters (Japanese slugs).
+     *
+     * CodeIgniter builds the URL with parse_url(), which under PHP's UTF-8 locale replaces the bytes
+     * 0x80-0x9F of multibyte characters with "_" and breaks the link. Percent-encoding the parameters first
+     * avoids that; the router decodes them again when the page is requested.
+     */
+    function url_to(string $controller, ...$args): string
+    {
+        foreach ($args as $i => $arg) {
+            if (is_string($arg)) {
+                $args[$i] = preg_replace_callback('/[^\x21-\x7E]+/', static fn (array $m): string => rawurlencode($m[0]), $arg);
+            }
+        }
+
+        if (! $route = route_to($controller, ...$args)) {
+            $explode = explode('::', $controller);
+
+            if (isset($explode[1])) {
+                throw CodeIgniter\Router\Exceptions\RouterException::forControllerNotFound($explode[0], $explode[1]);
+            }
+
+            throw CodeIgniter\Router\Exceptions\RouterException::forInvalidRoute($controller);
+        }
+
+        return site_url($route);
+    }
+}
+
 if (! function_exists('blade')) {
     /**
      * Render a Blade view from View/, e.g. blade('frontend.index') or blade('admin.dashboard', $data).

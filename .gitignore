@@ -139,3 +139,5 @@ writable/installed.lock
 /writable/security/
 # Google Analytics service account key (Settings → Analytics)
 /writable/analytics/
+# Migration files (Settings → Backup → Migration)
+/writable/migrations/

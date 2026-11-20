@@ -45,6 +45,7 @@ $routes->group(config('Cms')->adminPath, ['filter' => ['ipblock', 'dbupgrade']],
         $routes->get('branding', [Branding::class, 'index'], ['as' => 'admin.branding']);
         $routes->post('branding', [Branding::class, 'update'], ['as' => 'admin.branding.update']);
         $routes->delete('branding', [Branding::class, 'delete'], ['as' => 'admin.branding.delete']);
+        $routes->post('branding/background', [Branding::class, 'background'], ['as' => 'admin.branding.background']);
 
         // Image/file uploads for custom fields and CKEditor
         $routes->post('upload', [Media::class, 'upload'], ['as' => 'admin.upload']);
@@ -116,5 +117,13 @@ $routes->group(config('Cms')->adminPath, ['filter' => ['ipblock', 'dbupgrade']],
         $routes->get('backup', [Backup::class, 'index'], ['as' => 'admin.backup']);
         $routes->post('backup', [Backup::class, 'download'], ['as' => 'admin.backup.download']);
         $routes->post('backup/package', [Backup::class, 'package'], ['as' => 'admin.backup.package']);
+
+        // Migration (like All-in-One WP Migration): export / import the whole site
+        $routes->post('backup/migration/export', [Backup::class, 'migrationExport'], ['as' => 'admin.migration.export']);
+        $routes->post('backup/migration/upload', [Backup::class, 'migrationUpload'], ['as' => 'admin.migration.upload']);
+        $routes->get('backup/migration/file/(:segment)', [Backup::class, 'migrationDownload'], ['as' => 'admin.migration.file']);
+        $routes->delete('backup/migration/file/(:segment)', [Backup::class, 'migrationDelete'], ['as' => 'admin.migration.delete']);
+        $routes->post('backup/migration/import', [Backup::class, 'importStart'], ['as' => 'admin.migration.import']);
+        $routes->post('backup/migration/import/step', [Backup::class, 'importStep'], ['as' => 'admin.migration.step']);
     });
 });

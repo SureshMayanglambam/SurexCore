@@ -33,7 +33,10 @@ class Branding extends AdminController
 
     public function index(): string
     {
-        return $this->render('admin.branding.index', ['logo' => setting('site_logo', '')]);
+        return $this->render('admin.branding.index', [
+            'logo'   => setting('site_logo', ''),
+            'logoBg' => (string) setting('site_logo_bg', ''),
+        ]);
     }
 
     public function update(): RedirectResponse
@@ -83,6 +86,24 @@ class Branding extends AdminController
         log_activity('settings.logo', 'サイトロゴをアップロードしました');
 
         return redirect()->route('admin.branding')->with('success', lang('Admin.flash.brand_updated'));
+    }
+
+    /**
+     * Background colour behind the logo in the admin (e.g. white behind a dark logo on the dark sidebar).
+     * '' = transparent. Also available to templates: setting('site_logo_bg').
+     */
+    public function background(): RedirectResponse
+    {
+        $color = $this->request->getPost('logo_bg_none') === '1' ? '' : strtolower(trim((string) $this->request->getPost('logo_bg')));
+
+        if ($color !== '' && ! preg_match('/^#[0-9a-f]{6}$/', $color)) {
+            return redirect()->route('admin.branding')->with('error', lang('Admin.flash.brand_bg_invalid'));
+        }
+
+        model(SettingModel::class)->put('site_logo_bg', $color);
+        log_activity('settings.logo', 'ロゴの背景色を変更しました（' . ($color ?: '透明') . '）');
+
+        return redirect()->route('admin.branding')->with('success', lang('Admin.flash.brand_bg_saved'));
     }
 
     public function delete(): RedirectResponse
