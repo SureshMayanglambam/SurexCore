@@ -17,18 +17,24 @@ abstract class AdminController extends BaseController
     /** Languages the admin panel is available in. First is the default. */
     public const LOCALES = ['en' => 'English', 'ja' => '日本語'];
 
-    protected string $locale = 'ja';
+    protected string $locale = 'en';
+
+    /**
+     * The admin panel language for everyone: Settings → General → "Admin language" (setting admin_language).
+     * One site-wide choice, like other CMSs; English until an Administrator changes it.
+     */
+    public static function adminLocale(): string
+    {
+        $locale = (string) setting('admin_language', '');
+
+        return array_key_exists($locale, self::LOCALES) ? $locale : array_key_first(self::LOCALES);
+    }
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
 
-        // Admin UI language: a per-browser choice (top-bar switch), remembered in the session.
-        $locale = (string) (session('admin_locale') ?? '');
-        if (! array_key_exists($locale, self::LOCALES)) {
-            $locale = array_key_first(self::LOCALES);
-        }
-
+        $locale       = self::adminLocale();
         $this->locale = $locale;
         $request->setLocale($locale);
         service('language')->setLocale($locale);

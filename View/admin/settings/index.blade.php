@@ -32,6 +32,15 @@
                                    value="{{ old('posts_per_page', $values['posts_per_page']) }}">
                             <div class="form-text">{!! lang('Admin.settings.per_page_help', ["<code>setting('posts_per_page')</code>"]) !!}</div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="admin_language">{{ lang('Admin.settings.admin_language') }}</label>
+                            <select id="admin_language" name="admin_language" class="form-select">
+                                @foreach($locales as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('admin_language', $values['admin_language']) === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <div class="form-text">{{ lang('Admin.settings.admin_language_help') }}</div>
+                        </div>
                         <div>
                             <label class="form-label" for="date_format">{{ lang('Admin.settings.date_format') }}</label>
                             <select id="date_format" name="date_format" class="form-select">

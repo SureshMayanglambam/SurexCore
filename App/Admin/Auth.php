@@ -13,20 +13,6 @@ class Auth extends AdminController
      */
     private const MAX_ATTEMPTS = 5;
 
-    /**
-     * Switch the admin UI language (session only; no account change). Returns to the previous page.
-     */
-    public function setLocale(string $locale): RedirectResponse
-    {
-        if (array_key_exists($locale, self::LOCALES)) {
-            session()->set('admin_locale', $locale);
-        }
-
-        $back = previous_url();
-
-        return redirect()->to($back && str_contains($back, admin_path()) ? $back : (string) url_to('admin.dashboard'));
-    }
-
     public function login(): RedirectResponse|string
     {
         if (current_user() !== null) {

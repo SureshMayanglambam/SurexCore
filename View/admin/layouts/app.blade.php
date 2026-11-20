@@ -54,16 +54,6 @@
                     </a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a href="#" class="btn-icon" data-bs-toggle="dropdown" aria-expanded="false" title="{{ lang('Admin.language') }}">
-                        <i class="bi bi-translate"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        @foreach($locales as $code => $label)
-                            <li><a class="dropdown-item @if($locale === $code) active @endif" href="{{ url_to('admin.lang', $code) }}">{{ $label }}</a></li>
-                        @endforeach
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
                     <a href="#" class="header-profile" data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="avatar">{{ $initials }}</span>
                         <span class="d-none d-md-inline">{{ $user->name }}</span>

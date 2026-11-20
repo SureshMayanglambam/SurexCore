@@ -349,6 +349,8 @@ return [
 
     // ---- settings ----
     'settings' => [
+        'admin_language'         => '管理画面の言語',
+        'admin_language_help'    => 'すべてのアカウント（ログイン画面を含む）に適用される管理画面の言語です。Webサイト側には影響しません。',
         'title'            => '一般設定',
         'site'             => 'サイト',
         'site_name'        => 'サイト名',
@@ -850,6 +852,7 @@ return [
 
     // validation field labels
     'val' => [
+        'admin_language' => '管理画面の言語',
         'api_enabled'  => 'REST APIで公開',
         'slug'           => 'スラッグ',
         'status'         => 'ステータス',

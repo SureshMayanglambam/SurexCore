@@ -24,8 +24,7 @@ class AdminAuth implements FilterInterface
 
         if (! empty($arguments) && ! in_array($user->role, $arguments, true)) {
             // Runs before AdminController picks the admin language, so choose it here for the message.
-            $locale = (string) session('admin_locale');
-            service('language')->setLocale(array_key_exists($locale, \App\Admin\AdminController::LOCALES) ? $locale : array_key_first(\App\Admin\AdminController::LOCALES));
+            service('language')->setLocale(\App\Admin\AdminController::adminLocale());
 
             return redirect()->route('admin.dashboard')->with('error', lang('Admin.no_permission'));
         }

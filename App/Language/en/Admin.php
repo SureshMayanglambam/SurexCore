@@ -348,6 +348,8 @@ return [
 
     // ---- settings ----
     'settings' => [
+        'admin_language'         => 'Admin language',
+        'admin_language_help'    => 'The language of this admin panel for every account (and the login page). The website itself is not affected.',
         'title'            => 'General settings',
         'site'             => 'Site',
         'site_name'        => 'Site name',
@@ -840,6 +842,7 @@ return [
     ],
 
     'val' => [
+        'admin_language' => 'Admin language',
         'api_enabled'  => 'Expose REST API',
         'slug'           => 'Slug',
         'status'         => 'Status',

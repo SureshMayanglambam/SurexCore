@@ -18,6 +18,7 @@ class Settings extends AdminController
     private const DEFAULTS = [
         'site_name'               => 'SurexCore',
         'site_tagline'            => '',
+        'admin_language'          => 'en',
         'date_format'             => 'Y.m.d',
         'posts_per_page'          => 10,
         'activity_retention_days' => 90,
@@ -56,6 +57,7 @@ class Settings extends AdminController
         $rules = [
             'site_name'               => ['label' => lang('Admin.val.site_name'), 'rules' => 'required|max_length[100]'],
             'site_tagline'            => ['label' => lang('Admin.val.tagline'), 'rules' => 'permit_empty|max_length[255]'],
+            'admin_language'          => ['label' => lang('Admin.val.admin_language'), 'rules' => 'required|in_list[' . implode(',', array_keys(AdminController::LOCALES)) . ']'],
             'date_format'             => ['label' => lang('Admin.val.date_format'), 'rules' => 'required|max_length[20]'],
             'posts_per_page'          => ['label' => lang('Admin.val.per_page'), 'rules' => 'required|is_natural_no_zero|less_than_equal_to[100]'],
             'activity_retention_days' => ['label' => lang('Admin.val.retention'), 'rules' => 'required|is_natural_no_zero|less_than_equal_to[3650]'],
@@ -92,6 +94,9 @@ class Settings extends AdminController
         if ($changed !== []) {
             log_activity('settings.updated', '設定を変更しました: ' . implode('、', $changed));
         }
+
+        // The language may have just changed: say "saved" in the new one.
+        service('language')->setLocale(self::adminLocale());
 
         return redirect()->route('admin.settings')->with('success', lang('Admin.flash.settings_saved'));
     }

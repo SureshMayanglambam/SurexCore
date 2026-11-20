@@ -10,7 +10,7 @@
 **A lightweight, secure CMS for shared hosting — CodeIgniter 4 + Blade.**
 Build content types in the admin panel, write the website yourself in plain Blade.
 
-Version 0.1.8 (developer preview) · Developed by Suresh Mayanglambam
+Version 0.1.9 (developer preview) · Developed by Suresh Mayanglambam
 
 > This is a preview shared for feedback. See [Feedback](#feedback) at the end.
 
@@ -117,7 +117,7 @@ The installer locks itself afterwards (`writable/installed.lock`). To reinstall 
 | Code | Laravel-style models and queries (`NewsModel::published()->latest()->paginate(10)`), `make:cms-model` / `make:cms-controller` generators, a `Page` controller for view-only pages, a sample with every field kind |
 | Media | Media library (grid, search, drag & drop upload, where-used, delete), "メディアから選択" in every image/file field, CKEditor 5 image upload |
 | Site | Blade frontend you write yourself, contact form (入力 → 確認 → 完了) with **file attachment** and mail templates, automatic `sitemap.xml` / `robots.txt`, noindex switch, maintenance mode |
-| Admin | English / Japanese UI (English by default, switch in the top bar), roles, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
+| Admin | English / Japanese UI (one site-wide setting, English by default), roles, users, branding (logo), activity log, dashboard with charts and disk usage, **お問い合わせ inbox** (optional), **backup download** (.sql or .sql + uploads .zip) |
 | Ops | Installer, automatic migrations, hidden admin URL, **one-click deploy packages** in the admin (or `deploy.sh`) |
 | Security | Locked-down web server rules, no code execution in uploads, strict headers + admin CSP, CSRF protection, secure cookies, sanitized editor HTML, metadata-free images — see [Security](#security) |
 
@@ -396,7 +396,7 @@ model(InquiryModel::class)->store('recruit', ['お名前' => $name, …], $name,
 
 ## Admin panel features
 
-The admin panel is available in **English and Japanese** — English by default, switch any time from the top bar (remembered per browser). The menu labels below are shown in Japanese for reference.
+The admin panel is available in **English and Japanese**. The language is one site-wide setting — **Settings → General → Admin language** (English by default) — so every account and the login page use it until an Administrator changes it. The menu labels below are shown in Japanese for reference.
 
 | Menu | Who | What |
 |---|---|---|
@@ -416,6 +416,8 @@ Update locally first, test, then upload with the **Update** deploy package (the 
 1. Unpack the new version. Don't run the installer: copy the old site's `.env` and `writable/installed.lock`, import its database, and copy `public/uploads/`.
 2. Copy your own code into it: `App/Controller/Http/`, `App/Model/Http/`, `View/frontend/`, `public/assets/frontend/`, and add your own route lines to the new `routes/web.php` (don't replace the file: it contains SurexCore's routes too).
 3. Open the admin once — database changes run automatically. Test, then deploy.
+
+**From 0.1.8 or older:** the admin language is now one setting for the whole site. After updating it starts in English — choose 日本語 in **Settings → General → Admin language** if the site used Japanese.
 
 **From 0.1.7 or older:** your site's controllers and models were directly in `App/Controller/` and `App/Model/`. They keep working there; to use the new layout, move them into the `Http/` folders and change their namespaces to `App\Controller\Http` / `App\Model\Http` (and the `use` lines in `routes/web.php`).
 
